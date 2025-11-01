@@ -1,0 +1,51 @@
+# Railway Dockerfile
+FROM node:18-alpine
+
+# Install dependencies for Puppeteer
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# Set Puppeteer to use installed Chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+WORKDIR /app
+
+# Copy and install backend dependencies
+COPY backend/package*.json ./backend/
+WORKDIR /app/backend
+RUN npm install --only=production
+
+# Copy and build frontend
+WORKDIR /app
+COPY frontend/package*.json ./frontend/
+WORKDIR /app/frontend
+RUN npm ci --only=production
+COPY frontend/ ./
+RUN npm run build
+
+# Copy backend code
+WORKDIR /app
+COPY backend/ ./backend/
+
+# Copy built frontend to backend
+COPY --from=0 /app/frontend/build ./backend/build
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S algonix -u 1001 && \
+    chown -R algonix:nodejs /app
+
+USER algonix
+
+WORKDIR /app/backend
+
+EXPOSE 5000
+
+CMD ["npm", "start"]
