@@ -19,9 +19,14 @@ class GamificationService {
         description: 'Solved problems for 30 consecutive days',
         icon: '🏆'
       },
-      PROBLEM_SLAYER_10: {
-        name: 'Problem Slayer',
+      CODE_THUNDER: {
+        name: 'Code Thunder',
         description: 'Solved 10 problems',
+        icon: '⚡'
+      },
+      PROBLEM_SLAYER_25: {
+        name: 'Problem Slayer',
+        description: 'Solved 25 problems',
         icon: '⚔️'
       },
       PROBLEM_SLAYER_50: {
@@ -108,8 +113,11 @@ class GamificationService {
     }
 
     // Problem count badges
-    if (user.stats.solvedProblems >= 10 && !existingBadgeNames.includes('Problem Slayer')) {
-      newBadges.push(this.badges.PROBLEM_SLAYER_10);
+    if (user.stats.solvedProblems >= 10 && !existingBadgeNames.includes('Code Thunder')) {
+      newBadges.push(this.badges.CODE_THUNDER);
+    }
+    if (user.stats.solvedProblems >= 25 && !existingBadgeNames.includes('Problem Slayer')) {
+      newBadges.push(this.badges.PROBLEM_SLAYER_25);
     }
     if (user.stats.solvedProblems >= 50 && !existingBadgeNames.includes('Problem Destroyer')) {
       newBadges.push(this.badges.PROBLEM_SLAYER_50);
