@@ -36,7 +36,7 @@ const Profile: React.FC = () => {
   const [profileData, setProfileData] = useState({
     firstName: user?.profile?.firstName || '',
     lastName: user?.profile?.lastName || '',
-    bio: user?.profile?.bio || ',
+    bio: user?.profile?.bio || '',
   });
 
   const { data: certificates } = useQuery({
