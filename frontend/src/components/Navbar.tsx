@@ -92,13 +92,13 @@ const Navbar: React.FC = () => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <Chip
             icon={<EmojiEvents />}
-            label={`Level ${user?.stats.level}`}
+            label={`Level ${user?.stats?.level ?? 1}`}
             color="secondary"
             variant="outlined"
             size="small"
           />
           
-          <Badge badgeContent={user?.stats.totalPoints} color="secondary" max={9999}>
+          <Badge badgeContent={user?.stats?.totalPoints ?? 0} color="secondary" max={9999}>
             <Typography variant="body2" sx={{ color: 'white', mr: 1 }}>
               Points
             </Typography>

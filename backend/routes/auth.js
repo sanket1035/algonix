@@ -82,6 +82,10 @@ router.post('/login', async (req, res) => {
         email: user.email,
         profile: user.profile,
         stats: user.stats,
+        badges: user.badges,
+        certificates: user.certificates,
+        solvedChallenges: user.solvedChallenges,
+        unlockedChallenges: user.unlockedChallenges,
         isAdmin: user.isAdmin
       }
     });
