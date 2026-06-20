@@ -181,7 +181,7 @@ const AdminPanel: React.FC = () => {
   // Sample certificate HTML generator
   const generateSampleCertificateHTML = (user: any, certificate: any) => {
     const userName = `${user.profile.firstName || ''} ${user.profile.lastName || ''}`.trim() || user.username;
-    const date = certificate.earnedAt.toLocaleDateString('en-US', { 
+    const date = new Date(certificate.earnedAt).toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
@@ -475,8 +475,8 @@ const AdminPanel: React.FC = () => {
                   <TableRow key={user._id}>
                     <TableCell>{user.username}</TableCell>
                     <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.stats.level}</TableCell>
-                    <TableCell>{user.stats.totalPoints}</TableCell>
+                    <TableCell>{user.stats?.level ?? 1}</TableCell>
+                    <TableCell>{user.stats?.totalPoints ?? 0}</TableCell>
                     <TableCell>
                       <Chip
                         label={user.isAdmin ? 'Admin' : 'User'}

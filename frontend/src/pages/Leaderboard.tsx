@@ -66,7 +66,7 @@ const Leaderboard: React.FC = () => {
             </Avatar>
             <Box sx={{ flexGrow: 1 }}>
               <Typography variant="h6">
-                {user?.profile.firstName} {user?.profile.lastName} (@{user?.username})
+                {user?.profile?.firstName} {user?.profile?.lastName} (@{user?.username})
               </Typography>
               <Box sx={{ display: 'flex', gap: 3, mt: 1 }}>
                 <Box>
@@ -82,7 +82,7 @@ const Leaderboard: React.FC = () => {
                     Total Points
                   </Typography>
                   <Typography variant="h6">
-                    {user?.stats.totalPoints}
+                    {user?.stats?.totalPoints ?? 0}
                   </Typography>
                 </Box>
                 <Box>
@@ -90,7 +90,7 @@ const Leaderboard: React.FC = () => {
                     Level
                   </Typography>
                   <Typography variant="h6">
-                    {user?.stats.level}
+                    {user?.stats?.level ?? 1}
                   </Typography>
                 </Box>
               </Box>
@@ -145,14 +145,14 @@ const Leaderboard: React.FC = () => {
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Avatar
-                        src={entry.profile.avatar}
+                        src={entry.profile?.avatar}
                         sx={{ width: 40, height: 40 }}
                       >
-                        {entry.username[0].toUpperCase()}
+                        {entry.username?.[0]?.toUpperCase()}
                       </Avatar>
                       <Box>
                         <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-                          {entry.profile.firstName} {entry.profile.lastName}
+                          {entry.profile?.firstName} {entry.profile?.lastName}
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
                           @{entry.username}

@@ -34,9 +34,9 @@ const Profile: React.FC = () => {
   const { user, updateProfile } = useAuth();
   const [editMode, setEditMode] = useState(false);
   const [profileData, setProfileData] = useState({
-    firstName: user?.profile.firstName || '',
-    lastName: user?.profile.lastName || '',
-    bio: user?.profile.bio || '',
+    firstName: user?.profile?.firstName || '',
+    lastName: user?.profile?.lastName || '',
+    bio: user?.profile?.bio || ',
   });
 
   const { data: certificates } = useQuery({
@@ -73,8 +73,8 @@ const Profile: React.FC = () => {
 
   const getNextLevelProgress = () => {
     const levelThresholds = [0, 100, 250, 500, 1000, 2000, 3500, 5500, 8000, 12000, 17000, 25000];
-    const currentPoints = user?.stats.totalPoints || 0;
-    const currentLevel = user?.stats.level || 1;
+    const currentPoints = user?.stats?.totalPoints || 0;
+    const currentLevel = user?.stats?.level || 1;
     
     if (currentLevel >= levelThresholds.length) return 100;
     
@@ -93,35 +93,35 @@ const Profile: React.FC = () => {
           <Paper sx={{ p: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
               <Avatar
-                src={user?.profile.avatar}
+                src={user?.profile?.avatar}
                 sx={{ width: 100, height: 100, fontSize: '2rem' }}
               >
-                {user?.username[0].toUpperCase()}
+                {user?.username?.[0]?.toUpperCase()}
               </Avatar>
               <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {user?.profile.firstName} {user?.profile.lastName}
+                  {user?.profile?.firstName} {user?.profile?.lastName}
                 </Typography>
                 <Typography variant="h6" color="textSecondary">
                   @{user?.username}
                 </Typography>
                 <Typography variant="body1" sx={{ mt: 1 }}>
-                  {user?.profile.bio || 'No bio available'}
+                  {user?.profile?.bio || 'No bio available'}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
                   <Chip
                     icon={<EmojiEvents />}
-                    label={`Level ${user?.stats.level}`}
+                    label={`Level ${user?.stats?.level ?? 1}`}
                     color="primary"
                   />
                   <Chip
                     icon={<TrendingUp />}
-                    label={`${user?.stats.totalPoints} Points`}
+                    label={`${user?.stats?.totalPoints ?? 0} Points`}
                     color="secondary"
                   />
                   <Chip
                     icon={<Code />}
-                    label={`${user?.stats.solvedProblems} Solved`}
+                    label={`${user?.stats?.solvedProblems ?? 0} Solved`}
                     variant="outlined"
                   />
                 </Box>
@@ -145,13 +145,13 @@ const Profile: React.FC = () => {
                 Level Progress
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                <Typography variant="body2">Level {user?.stats.level}</Typography>
+                <Typography variant="body2">Level {user?.stats?.level ?? 1}</Typography>
                 <LinearProgress
                   variant="determinate"
                   value={getNextLevelProgress()}
                   sx={{ flexGrow: 1, height: 8, borderRadius: 4 }}
                 />
-                <Typography variant="body2">Level {(user?.stats.level || 1) + 1}</Typography>
+                <Typography variant="body2">Level {(user?.stats?.level || 1) + 1}</Typography>
               </Box>
               <Typography variant="body2" color="textSecondary">
                 {Math.round(getNextLevelProgress())}% to next level
@@ -167,7 +167,7 @@ const Profile: React.FC = () => {
                 Current Streak
               </Typography>
               <Typography variant="h3" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                {user?.stats.streak}
+                {user?.stats?.streak ?? 0}
               </Typography>
               <Typography variant="body2" color="textSecondary">
                 days in a row
@@ -183,7 +183,7 @@ const Profile: React.FC = () => {
                 Weekly Points
               </Typography>
               <Typography variant="h3" sx={{ fontWeight: 'bold', color: 'secondary.main' }}>
-                {user?.stats.weeklyPoints}
+                {user?.stats?.weeklyPoints ?? 0}
               </Typography>
               <Typography variant="body2" color="textSecondary">
                 this week
@@ -196,10 +196,10 @@ const Profile: React.FC = () => {
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Badges ({user?.badges.length || 0})
+              Badges ({user?.badges?.length || 0})
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              {user?.badges.map((badge, index) => (
+              {user?.badges?.map((badge, index) => (
                 <Card key={index} sx={{ minWidth: 200 }}>
                   <CardContent sx={{ textAlign: 'center', py: 2 }}>
                     <Typography variant="h4" sx={{ mb: 1 }}>

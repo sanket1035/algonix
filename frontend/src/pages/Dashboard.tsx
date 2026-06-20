@@ -42,8 +42,8 @@ const Dashboard: React.FC = () => {
 
   const getNextLevelProgress = () => {
     const levelThresholds = [0, 150, 550, 900]; // New point-based thresholds
-    const currentPoints = user?.stats.totalPoints || 0;
-    const currentLevel = user?.stats.level || 1;
+    const currentPoints = user?.stats?.totalPoints || 0;
+    const currentLevel = user?.stats?.level || 1;
     
     if (currentLevel >= levelThresholds.length) return 100;
     
@@ -57,7 +57,7 @@ const Dashboard: React.FC = () => {
   const getRecentBadges = () => {
     // Add test badges if user has no badges but has solved problems
     const userBadges = user?.badges || [];
-    if (userBadges.length === 0 && (user?.stats.solvedProblems || 0) > 0) {
+    if (userBadges.length === 0 && (user?.stats?.solvedProblems || 0) > 0) {
       return [
         { name: 'Starter', description: 'Solved 1 problem', icon: '🌱', earnedAt: new Date() },
         { name: 'Beginner Solver', description: 'Solved 5 problems', icon: '📚', earnedAt: new Date() }
@@ -91,7 +91,7 @@ const Dashboard: React.FC = () => {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
-        Welcome back, {user?.profile.firstName || user?.username}! 👋
+        Welcome back, {user?.profile?.firstName || user?.username}! 👋
       </Typography>
 
       <Grid container spacing={3}>
@@ -102,7 +102,7 @@ const Dashboard: React.FC = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {user?.stats.totalPoints}
+                    {user?.stats?.totalPoints ?? 0}
                   </Typography>
                   <Typography variant="body2">Total Points</Typography>
                 </Box>
@@ -118,7 +118,7 @@ const Dashboard: React.FC = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {user?.stats.level}
+                    {user?.stats?.level ?? 1}
                   </Typography>
                   <Typography variant="body2">Current Level</Typography>
                 </Box>
@@ -134,7 +134,7 @@ const Dashboard: React.FC = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {user?.stats.solvedProblems}
+                    {user?.stats?.solvedProblems ?? 0}
                   </Typography>
                   <Typography variant="body2">Problems Solved</Typography>
                 </Box>
@@ -150,7 +150,7 @@ const Dashboard: React.FC = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {user?.stats.streak}
+                    {user?.stats?.streak ?? 0}
                   </Typography>
                   <Typography variant="body2">Day Streak</Typography>
                 </Box>
@@ -167,19 +167,19 @@ const Dashboard: React.FC = () => {
               Level Progress
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <Typography variant="body2">Level {user?.stats.level}</Typography>
+              <Typography variant="body2">Level {user?.stats?.level ?? 1}</Typography>
               <LinearProgress
                 variant="determinate"
                 value={nextLevelProgress}
                 sx={{ flexGrow: 1, height: 8, borderRadius: 4 }}
               />
-              <Typography variant="body2">Level {(user?.stats.level || 1) + 1}</Typography>
+              <Typography variant="body2">Level {(user?.stats?.level || 1) + 1}</Typography>
             </Box>
             <Typography variant="body2" color="textSecondary">
               {Math.round(nextLevelProgress)}% to next level
-              {user?.stats.level === 1 && ` (${150 - (user?.stats.totalPoints || 0)} points needed for Intermediate)`}
-              {user?.stats.level === 2 && ` (${550 - (user?.stats.totalPoints || 0)} points needed for Advanced)`}
-              {user?.stats.level === 3 && ` (${900 - (user?.stats.totalPoints || 0)} points needed for Expert)`}
+              {user?.stats?.level === 1 && ` (${150 - (user?.stats?.totalPoints || 0)} points needed for Intermediate)`}
+              {user?.stats?.level === 2 && ` (${550 - (user?.stats?.totalPoints || 0)} points needed for Advanced)`}
+              {user?.stats?.level === 3 && ` (${900 - (user?.stats?.totalPoints || 0)} points needed for Expert)`}
             </Typography>
           </Paper>
         </Grid>
@@ -310,7 +310,7 @@ const Dashboard: React.FC = () => {
                 />
                 <Typography variant="body2">
                   You're ranked #{leaderboardData.currentUser?.rank || 'N/A'} this week with{' '}
-                  {user?.stats.weeklyPoints} points
+                  {user?.stats?.weeklyPoints ?? 0} points
                 </Typography>
               </Box>
             </Paper>
