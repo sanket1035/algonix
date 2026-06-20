@@ -50,6 +50,11 @@ const Navbar: React.FC = () => {
     { label: 'Contact', path: '/contact', icon: <AccountCircle /> },
   ];
 
+  // Add admin panel for admin users
+  if (user?.isAdmin) {
+    navItems.push({ label: 'Admin Panel', path: '/admin', icon: <AdminPanelSettings /> });
+  }
+
   return (
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar>

@@ -29,7 +29,7 @@ services:
       - MONGODB_URI=mongodb://admin:password123@mongodb:27017/algonix?authSource=admin
       - JWT_SECRET=your_super_secret_jwt_key_change_in_production
       - JUDGE0_URL=https://judge0-ce.p.rapidapi.com
-      - RAPIDAPI_KEY=54a37af9a3msh5467d5ea6a508cfp15c96disnf29d7fe0e43c
+      - RAPIDAPI_KEY=${RAPIDAPI_KEY:-your_rapidapi_key_here}
     depends_on:
       - mongodb
     networks:

@@ -36,6 +36,7 @@ import {
   Assessment,
   People,
   Code,
+  EmojiEvents,
 } from '@mui/icons-material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminAPI } from '../services/api';
@@ -177,6 +178,149 @@ const AdminPanel: React.FC = () => {
     });
   };
 
+  // Sample certificate HTML generator
+  const generateSampleCertificateHTML = (user: any, certificate: any) => {
+    const userName = `${user.profile.firstName || ''} ${user.profile.lastName || ''}`.trim() || user.username;
+    const date = certificate.earnedAt.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Algonix Certificate</title>
+        <style>
+          body {
+            font-family: 'Georgia', serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .certificate {
+            background: white;
+            padding: 60px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+            border: 8px solid #f8f9fa;
+            position: relative;
+          }
+          .certificate::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+          }
+          .logo {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+          }
+          .title {
+            font-size: 36px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+          }
+          .subtitle {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 40px;
+          }
+          .recipient {
+            font-size: 32px;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-weight: bold;
+          }
+          .achievement {
+            font-size: 24px;
+            color: #667eea;
+            margin-bottom: 40px;
+            font-weight: bold;
+          }
+          .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 20px 0;
+          }
+          .details {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 40px;
+            line-height: 1.6;
+          }
+          .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 2px solid #ecf0f1;
+          }
+          .date {
+            font-size: 14px;
+            color: #7f8c8d;
+          }
+          .signature {
+            text-align: center;
+          }
+          .signature-line {
+            border-top: 2px solid #2c3e50;
+            width: 200px;
+            margin-bottom: 10px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="certificate">
+          <div class="logo">ALGONIX</div>
+          <div class="title">Certificate of Achievement</div>
+          <div class="subtitle">This is to certify that</div>
+          
+          <div class="recipient">${userName}</div>
+          
+          <div class="achievement">has successfully completed</div>
+          
+          <div class="badge">${certificate.name}</div>
+          
+          <div class="details">
+            This certificate recognizes the completion of ${certificate.level} level challenges<br>
+            and demonstrates proficiency in algorithmic problem solving and programming skills.
+          </div>
+          
+          <div class="footer">
+            <div class="date">Issued on ${date}</div>
+            <div class="signature">
+              <div class="signature-line"></div>
+              <div>Algonix Platform</div>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  };
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
@@ -241,6 +385,7 @@ const AdminPanel: React.FC = () => {
           <Tab icon={<Code />} label="Challenges" iconPosition="start" />
           <Tab icon={<People />} label="Users" iconPosition="start" />
           <Tab icon={<Assessment />} label="Statistics" iconPosition="start" />
+          <Tab icon={<EmojiEvents />} label="Certificates" iconPosition="start" />
         </Tabs>
 
         {/* Challenges Tab */}
@@ -391,6 +536,138 @@ const AdminPanel: React.FC = () => {
             </Grid>
           </Grid>
         </TabPanel>
+
+        {/* Certificates Tab */}
+        <TabPanel value={activeTab} index={3}>
+          <Typography variant="h6" gutterBottom>
+            Certificate Management
+          </Typography>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Sample Certificate Preview
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                    Preview how certificates look when issued to students.
+                  </Typography>
+                  
+                  <Button 
+                    variant="contained" 
+                    startIcon={<EmojiEvents />}
+                    onClick={() => {
+                      const sampleCert = {
+                        name: 'Beginner Mastery',
+                        level: 'Beginner',
+                        earnedAt: new Date()
+                      };
+                      
+                      const sampleUser = {
+                        username: 'sample_student',
+                        profile: {
+                          firstName: 'John',
+                          lastName: 'Doe'
+                        }
+                      };
+                      
+                      const html = generateSampleCertificateHTML(sampleUser, sampleCert);
+                      const newWindow = window.open('', '_blank');
+                      if (newWindow) {
+                        newWindow.document.write(html);
+                        newWindow.document.close();
+                      }
+                    }}
+                    fullWidth
+                  >
+                    Preview Sample Certificate
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+            
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Manual Certificate Issuance
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                    Manually award certificates to deserving students.
+                  </Typography>
+                  
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <TextField
+                      label="Student Email"
+                      placeholder="student@example.com"
+                      size="small"
+                      fullWidth
+                    />
+                    <FormControl size="small" fullWidth>
+                      <InputLabel>Certificate Type</InputLabel>
+                      <Select label="Certificate Type">
+                        <MenuItem value="Beginner Mastery">🥉 Beginner Mastery</MenuItem>
+                        <MenuItem value="Intermediate Mastery">🥈 Intermediate Mastery</MenuItem>
+                        <MenuItem value="Advanced Mastery">🥇 Advanced Mastery</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <Button 
+                      variant="outlined" 
+                      startIcon={<Add />}
+                      fullWidth
+                    >
+                      Issue Certificate
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+          
+          <Card sx={{ mt: 3 }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Certificate Criteria & Auto-Awarding
+              </Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+                Certificates are automatically awarded when students reach these milestones:
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ p: 2, border: 1, borderColor: 'success.main', borderRadius: 1 }}>
+                    <Typography variant="subtitle1" color="success.main" gutterBottom>
+                      🥉 Beginner Mastery
+                    </Typography>
+                    <Typography variant="body2">
+                      Auto-awarded after solving 10 Beginner level problems
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ p: 2, border: 1, borderColor: 'warning.main', borderRadius: 1 }}>
+                    <Typography variant="subtitle1" color="warning.main" gutterBottom>
+                      🥈 Intermediate Mastery
+                    </Typography>
+                    <Typography variant="body2">
+                      Auto-awarded after solving 15 Intermediate level problems
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ p: 2, border: 1, borderColor: 'error.main', borderRadius: 1 }}>
+                    <Typography variant="subtitle1" color="error.main" gutterBottom>
+                      🥇 Advanced Mastery
+                    </Typography>
+                    <Typography variant="body2">
+                      Auto-awarded after solving 20 Advanced level problems
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </TabPanel>
       </Paper>
 
       {/* Challenge Dialog */}
@@ -445,6 +722,64 @@ const AdminPanel: React.FC = () => {
               label="Tags (comma separated)"
               value={challengeForm.tags}
               onChange={(e) => setChallengeForm({ ...challengeForm, tags: e.target.value })}
+              fullWidth
+            />
+            
+            {/* Test Cases Section */}
+            <Typography variant="h6" sx={{ mt: 2 }}>Test Cases</Typography>
+            {challengeForm.testCases.map((testCase, index) => (
+              <Box key={index} sx={{ border: 1, borderColor: 'grey.300', p: 2, borderRadius: 1 }}>
+                <Typography variant="subtitle2" gutterBottom>Test Case {index + 1}</Typography>
+                <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
+                  <TextField
+                    label="Input"
+                    value={testCase.input}
+                    onChange={(e) => {
+                      const newTestCases = [...challengeForm.testCases];
+                      newTestCases[index].input = e.target.value;
+                      setChallengeForm({ ...challengeForm, testCases: newTestCases });
+                    }}
+                    fullWidth
+                  />
+                  <TextField
+                    label="Expected Output"
+                    value={testCase.expectedOutput}
+                    onChange={(e) => {
+                      const newTestCases = [...challengeForm.testCases];
+                      newTestCases[index].expectedOutput = e.target.value;
+                      setChallengeForm({ ...challengeForm, testCases: newTestCases });
+                    }}
+                    fullWidth
+                  />
+                </Box>
+              </Box>
+            ))}
+            <Button onClick={addTestCase} variant="outlined" size="small">
+              Add Test Case
+            </Button>
+            
+            {/* Starter Code Section */}
+            <Typography variant="h6" sx={{ mt: 2 }}>Starter Code</Typography>
+            <TextField
+              label="JavaScript Starter Code"
+              value={challengeForm.starterCode.javascript}
+              onChange={(e) => setChallengeForm({ 
+                ...challengeForm, 
+                starterCode: { ...challengeForm.starterCode, javascript: e.target.value }
+              })}
+              multiline
+              rows={3}
+              fullWidth
+            />
+            <TextField
+              label="Python Starter Code"
+              value={challengeForm.starterCode.python}
+              onChange={(e) => setChallengeForm({ 
+                ...challengeForm, 
+                starterCode: { ...challengeForm.starterCode, python: e.target.value }
+              })}
+              multiline
+              rows={3}
               fullWidth
             />
           </Box>

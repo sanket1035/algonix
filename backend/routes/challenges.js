@@ -169,4 +169,55 @@ router.post('/skill-test', auth, async (req, res) => {
   }
 });
 
+// Submit skill test results
+router.post('/skill-test/submit', auth, async (req, res) => {
+  console.log('🚀 SKILL TEST SUBMIT ROUTE HIT!');
+  try {
+    const { results, difficulty } = req.body;
+    console.log('Results received:', results);
+    
+    // Count correct answers from frontend validation
+    const correctAnswers = results.filter(r => r.correct === true).length;
+    const total = results.length;
+    const passThreshold = Math.ceil(total * 0.7);
+    const passed = correctAnswers >= passThreshold;
+    
+    console.log(`Correct: ${correctAnswers}, Total: ${total}, Threshold: ${passThreshold}, Passed: ${passed}`);
+
+    if (passed) {
+      // Unlock challenges
+      const challengesToUnlock = await Challenge.find({ 
+        difficulty, 
+        isActive: true 
+      }).select('_id');
+
+      await User.findByIdAndUpdate(req.user._id, {
+        $addToSet: { 
+          unlockedChallenges: { 
+            $each: challengesToUnlock.map(c => c._id) 
+          }
+        }
+      });
+
+      console.log('TEST PASSED - Unlocking challenges');
+      res.json({ 
+        passed: true, 
+        score: correctAnswers,
+        total: total,
+        unlockedCount: challengesToUnlock.length
+      });
+    } else {
+      console.log('TEST FAILED');
+      res.json({ 
+        passed: false, 
+        score: correctAnswers,
+        total: total
+      });
+    }
+  } catch (error) {
+    console.error('Skill test error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 module.exports = router;

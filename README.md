@@ -1,281 +1,133 @@
-# Algonix - Gamified Coding Skill Development Platform
+# Algonix
 
-A comprehensive full-stack web application for learning and practicing coding skills through gamified challenges, competitions, and skill assessments.
+A gamified coding skill development platform. Practice algorithms, earn badges, climb leaderboards, and unlock challenges through skill tests or progressive completion.
 
-## 🚀 Features
+## Features
 
-### Core Features
-- **User Authentication & Profiles**: Secure registration/login with comprehensive profile management
-- **Coding Challenges**: Multi-difficulty challenges (Beginner → Expert) with progressive unlocking
-- **Dual Access Paths**: 
-  - Progressive unlocking through prerequisite completion
-  - Fast-track skill test-based unlocking
-- **Code Execution**: Sandboxed code evaluation using Judge0 API
-- **Multi-language Support**: JavaScript, Python, Java, C++
+- **Coding Challenges** — Multi-difficulty (Beginner → Expert) with progressive unlocking
+- **Skill Tests** — MCQ-based fast-track unlocking by difficulty level
+- **Code Editor** — Monaco Editor with multi-language support (JS, Python, Java, C++)
+- **Gamification** — Points, levels, badges, streaks, and certificates
+- **Leaderboards** — Weekly and all-time rankings
+- **Admin Panel** — Manage challenges, users, and platform stats
 
-### Gamification Elements
-- **Points System**: Earn points for solving challenges
-- **Badges**: Achievement system (First Solve, Daily Streak, Problem Slayer, etc.)
-- **Levels**: Progressive leveling based on total points
-- **Certificates**: PDF certificates for milestone completions
-- **Leaderboards**: Real-time weekly and all-time rankings
-- **Streaks**: Daily solving streak tracking
+## Tech Stack
 
-### User Experience
-- **Personal Dashboard**: Progress tracking, stats visualization, quick actions
-- **Code Editor**: Monaco Editor with syntax highlighting and multi-language support
-- **Real-time Feedback**: Instant test case results and performance metrics
-- **Responsive Design**: Mobile-friendly Material-UI interface
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, TypeScript, Material-UI, TanStack Query, Monaco Editor |
+| Backend | Node.js, Express.js, MongoDB/Mongoose, JWT |
+| Code Execution | Judge0 API (RapidAPI) |
+| DevOps | Docker, Docker Compose, Nginx |
 
-### Admin Features
-- **Challenge Management**: Create, edit, delete challenges
-- **User Management**: Monitor user progress and statistics
-- **Analytics Dashboard**: Platform usage statistics
-- **Content Control**: Manage challenge difficulty and prerequisites
-
-## 🛠 Technology Stack
-
-### Backend
-- **Node.js** with Express.js
-- **MongoDB** with Mongoose ODM
-- **JWT** authentication
-- **Judge0 API** for code execution
-- **Puppeteer** for PDF certificate generation
-- **Node-cron** for scheduled tasks
-
-### Frontend
-- **React 18** with TypeScript
-- **Material-UI (MUI)** for components
-- **React Router** for navigation
-- **TanStack Query** for state management
-- **Monaco Editor** for code editing
-- **Recharts** for data visualization
-
-### DevOps & Deployment
-- **Docker** containerization
-- **Docker Compose** for multi-service orchestration
-- **Nginx** reverse proxy with security headers
-- **MongoDB** with proper indexing
-
-## 📦 Installation & Setup
+## Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - Docker & Docker Compose
-- MongoDB (if running locally)
-- Judge0 API key (RapidAPI)
+- [Judge0 API key](https://rapidapi.com/judge0-official/api/judge0-ce/) from RapidAPI
 
-### Quick Start with Docker
+### With Docker (Recommended)
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd algonix
-   ```
+```bash
+git clone <repository-url>
+cd algonix
 
-2. **Configure environment variables**
-   ```bash
-   cp backend/.env.example backend/.env
-   # Edit backend/.env with your configuration
-   ```
+# Configure environment
+cp backend/.env.example backend/.env
+# Edit backend/.env — set JWT_SECRET, RAPIDAPI_KEY, FRONTEND_URL
 
-3. **Start with Docker Compose**
-   ```bash
-   docker-compose up -d
-   ```
+docker-compose up -d
+```
 
-4. **Access the application**
-   - Frontend: http://localhost
-   - API: http://localhost/api
-   - MongoDB: localhost:27017
+App will be available at `http://localhost`.
 
-### Local Development Setup
+### Local Development
 
-1. **Install dependencies**
-   ```bash
-   npm run install-all
-   ```
+```bash
+# Install all dependencies
+npm run install-all
 
-2. **Set up environment variables**
-   ```bash
-   cp backend/.env.example backend/.env
-   # Configure your MongoDB URI, JWT secret, and Judge0 API key
-   ```
+# Configure environment
+cp backend/.env.example backend/.env
+# Edit backend/.env with your values
 
-3. **Start MongoDB**
-   ```bash
-   # Using Docker
-   docker run -d -p 27017:27017 --name mongodb mongo:6.0
-   
-   # Or use local MongoDB installation
-   mongod
-   ```
+# Start MongoDB
+docker run -d -p 27017:27017 --name mongodb mongo:6.0
 
-4. **Start development servers**
-   ```bash
-   npm run dev
-   ```
+# Start dev servers (frontend :3000, backend :5000)
+npm run dev
+```
 
-5. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5000
+## Environment Variables
 
-## 🔧 Configuration
-
-### Environment Variables
-
-Create `backend/.env` with the following variables:
+Create `backend/.env` from `backend/.env.example`:
 
 ```env
 PORT=5000
 MONGODB_URI=mongodb://localhost:27017/algonix
-JWT_SECRET=your_super_secret_jwt_key
+JWT_SECRET=<your_strong_secret>
 JUDGE0_URL=https://judge0-ce.p.rapidapi.com
-RAPIDAPI_KEY=your_rapidapi_key_here
+RAPIDAPI_KEY=<your_rapidapi_key>
 NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
 ```
 
-### Judge0 API Setup
+> **Never commit `.env` to version control.** It is listed in `.gitignore`.
 
-1. Sign up at [RapidAPI](https://rapidapi.com/)
-2. Subscribe to [Judge0 CE](https://rapidapi.com/judge0-official/api/judge0-ce/)
-3. Get your API key and add it to the environment variables
+## API Endpoints
 
-## 🧪 Testing
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/auth/register` | Register user |
+| POST | `/api/auth/login` | Login |
+| GET | `/api/auth/me` | Get current user |
+| PUT | `/api/auth/profile` | Update profile |
+| GET | `/api/challenges` | List challenges |
+| GET | `/api/challenges/:id` | Get challenge |
+| POST | `/api/challenges/skill-test` | Get skill test questions |
+| POST | `/api/challenges/skill-test/submit` | Submit skill test |
+| POST | `/api/submissions` | Submit solution |
+| GET | `/api/submissions/my-submissions` | User submissions |
+| GET | `/api/leaderboard/weekly` | Weekly leaderboard |
+| GET | `/api/leaderboard/all-time` | All-time leaderboard |
 
-### Backend Testing
+## Deployment
+
+### Cloud Platforms
+
+**Render / Railway** — Use the included `render.yaml` / `railway.json`. Set env vars in the platform dashboard.
+
+**AWS**
+- Backend: ECS or EC2 with Docker
+- Database: MongoDB Atlas or DocumentDB
+- Frontend build served via Express static or S3 + CloudFront
+
+### Production Docker
+
 ```bash
-cd backend
-npm test
+docker-compose up -d --build
 ```
 
-### Frontend Testing
-```bash
-cd frontend
-npm test
-```
+For HTTPS, place SSL certificates in `./ssl/` and update `nginx.conf`.
 
-### Integration Testing
-```bash
-npm run test:integration
-```
+## Database
 
-## 📊 Database Schema
+MongoDB collections:
 
-### Collections
-- **users**: User profiles, stats, badges, certificates
-- **challenges**: Problem statements, test cases, starter code
-- **submissions**: Code submissions and results
+- `users` — profiles, stats, badges, certificates, solved/unlocked challenges
+- `challenges` — problem statements, test cases, starter code
+- `submissions` — code submissions and results
 
-### Key Indexes
-- Users: email, username, totalPoints, weeklyPoints
-- Challenges: difficulty, isActive, order
-- Submissions: user, challenge, createdAt
+## Security
 
-## 🚀 Deployment
-
-### Production Deployment
-
-1. **Build and deploy with Docker**
-   ```bash
-   docker-compose -f docker-compose.prod.yml up -d
-   ```
-
-2. **Set up SSL certificates**
-   ```bash
-   # Place SSL certificates in ./ssl/ directory
-   # Update nginx.conf for HTTPS configuration
-   ```
-
-3. **Configure domain and DNS**
-   - Point your domain to the server IP
-   - Update nginx.conf with your domain name
-
-### Cloud Deployment Options
-
-#### AWS Deployment
-- **ECS**: Use the provided Dockerfile
-- **EC2**: Deploy using Docker Compose
-- **DocumentDB**: For managed MongoDB
-- **CloudFront**: For CDN and SSL
-
-#### Google Cloud Platform
-- **Cloud Run**: Containerized deployment
-- **GKE**: Kubernetes deployment
-- **Cloud MongoDB**: Managed database
-
-#### Azure
-- **Container Instances**: Quick deployment
-- **AKS**: Kubernetes orchestration
-- **Cosmos DB**: MongoDB-compatible database
-
-## 🔒 Security Features
-
-- JWT-based authentication
-- Password hashing with bcrypt
-- Rate limiting on API endpoints
-- Input validation and sanitization
-- CORS configuration
+- JWT authentication with 7-day expiry
+- bcrypt password hashing
+- Nginx rate limiting (API: 10 req/s, login: 5 req/min)
+- CORS restricted to configured origins
 - Security headers via Nginx
-- Sandboxed code execution
 
-## 📈 Performance Optimizations
+## License
 
-- Database indexing for fast queries
-- Code splitting in React frontend
-- Gzip compression via Nginx
-- Efficient MongoDB aggregation pipelines
-- Caching strategies for leaderboards
-- Optimized Docker images
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📝 API Documentation
-
-### Authentication Endpoints
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `GET /api/auth/me` - Get current user
-- `PUT /api/auth/profile` - Update profile
-
-### Challenge Endpoints
-- `GET /api/challenges` - Get all challenges
-- `GET /api/challenges/:id` - Get single challenge
-- `POST /api/challenges/skill-test` - Get skill test
-- `POST /api/challenges/skill-test/submit` - Submit skill test
-
-### Submission Endpoints
-- `POST /api/submissions` - Submit solution
-- `GET /api/submissions/my-submissions` - Get user submissions
-- `GET /api/submissions/:id` - Get submission details
-
-### Leaderboard Endpoints
-- `GET /api/leaderboard/weekly` - Weekly leaderboard
-- `GET /api/leaderboard/all-time` - All-time leaderboard
-- `GET /api/leaderboard/around-me` - User's position
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Judge0 for code execution API
-- Material-UI for React components
-- Monaco Editor for code editing
-- MongoDB for database solutions
-- Docker for containerization
-
-## 📞 Support
-
-For support, email support@algonix.com or create an issue in the repository.
-
----
-
-**Happy Coding! 🚀**
+MIT

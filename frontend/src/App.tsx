@@ -13,7 +13,7 @@ import ChallengeDetail from './pages/ChallengeDetail';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
 import AdminPanel from './pages/AdminPanel';
-import SkillTest from './pages/SkillTest';
+import SkillTestSimple from './pages/SkillTestSimple';
 import Contact from './pages/Contact';
 
 const theme = createTheme({
@@ -76,7 +76,7 @@ const AppContent: React.FC = () => {
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/challenges" element={<ProtectedRoute><Challenges /></ProtectedRoute>} />
             <Route path="/challenges/:id" element={<ProtectedRoute><ChallengeDetail /></ProtectedRoute>} />
-            <Route path="/skill-test" element={<ProtectedRoute><SkillTest /></ProtectedRoute>} />
+            <Route path="/skill-test" element={<ProtectedRoute><SkillTestSimple /></ProtectedRoute>} />
             <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
