@@ -112,7 +112,7 @@ const Navbar: React.FC = () => {
             onClick={handleMenu}
             color="inherit"
           >
-            {user?.profile.avatar ? (
+            {user?.profile?.avatar ? (
               <Avatar src={user.profile.avatar} sx={{ width: 32, height: 32 }} />
             ) : (
               <AccountCircle />
