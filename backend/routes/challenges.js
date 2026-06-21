@@ -22,6 +22,7 @@ router.get('/', auth, async (req, res) => {
       isSolved: user.solvedChallenges.includes(challenge._id),
       isUnlocked: user.unlockedChallenges.includes(challenge._id) || 
                   challenge.fastTrackUnlock ||
+                  challenge.difficulty === 'Beginner' ||
                   user.solvedChallenges.some(solvedId => 
                     challenge.prerequisites.includes(solvedId)
                   )

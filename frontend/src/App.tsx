@@ -55,7 +55,15 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 const AppContent: React.FC = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Router>
@@ -63,8 +71,8 @@ const AppContent: React.FC = () => {
         {user && <Navbar />}
         <Box component="main" sx={{ flexGrow: 1, pt: user ? 8 : 0 }}>
           <Routes>
-            <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
-            <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <Register />} />
+            <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+            <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <Register />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/challenges" element={<ProtectedRoute><Challenges /></ProtectedRoute>} />
             <Route path="/challenges/:id" element={<ProtectedRoute><ChallengeDetail /></ProtectedRoute>} />
@@ -73,7 +81,7 @@ const AppContent: React.FC = () => {
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
             <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
-            <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
+            <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
           </Routes>
         </Box>
       </Box>

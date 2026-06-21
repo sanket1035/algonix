@@ -15,6 +15,7 @@ import {
   TextField,
   IconButton,
   Tooltip,
+  CircularProgress,
 } from '@mui/material';
 import {
   Lock,
@@ -72,7 +73,9 @@ const Challenges: React.FC = () => {
   if (isLoading) {
     return (
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Typography>Loading challenges...</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
       </Container>
     );
   }
@@ -220,13 +223,17 @@ const Challenges: React.FC = () => {
         );
       })}
 
-      {filteredChallenges.length === 0 && (
+      {!isLoading && filteredChallenges.length === 0 && (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h6" color="textSecondary">
-            No challenges found matching your criteria
+            {Array.isArray(challenges) && challenges.length > 0
+              ? 'No challenges found matching your criteria'
+              : 'No challenges available yet'}
           </Typography>
           <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-            Try adjusting your search or filters
+            {Array.isArray(challenges) && challenges.length > 0
+              ? 'Try adjusting your search or filters'
+              : 'Check back soon!'}
           </Typography>
         </Box>
       )}
