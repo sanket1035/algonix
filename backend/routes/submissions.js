@@ -36,6 +36,46 @@ function normalizeOutput(str) {
   return (str || '').trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 }
 
+function parseOutput(value) {
+  const normalized = normalizeOutput(value);
+  try {
+    return JSON.parse(normalized);
+  } catch {
+    return normalized;
+  }
+}
+
+function compareOutputs(actualRaw, expectedRaw) {
+  const actual = parseOutput(actualRaw);
+  const expected = parseOutput(expectedRaw);
+
+  if (typeof actual === 'string' && typeof expected === 'string') {
+    if (actual === expected) return true;
+    const whitespaceNormalizedActual = actual.replace(/\s+/g, ' ').trim();
+    const whitespaceNormalizedExpected = expected.replace(/\s+/g, ' ').trim();
+    return whitespaceNormalizedActual === whitespaceNormalizedExpected;
+  }
+
+  if (typeof actual === 'boolean' && typeof expected === 'boolean') {
+    return actual === expected;
+  }
+
+  if (typeof actual === 'number' && typeof expected === 'number') {
+    return actual === expected;
+  }
+
+  if (Array.isArray(actual) && Array.isArray(expected)) {
+    if (actual.length !== expected.length) return false;
+    return actual.every((item, idx) => JSON.stringify(item) === JSON.stringify(expected[idx]));
+  }
+
+  if (actual && expected && typeof actual === 'object' && typeof expected === 'object') {
+    return JSON.stringify(actual) === JSON.stringify(expected);
+  }
+
+  return actual === expected;
+}
+
 router.post('/', auth, async (req, res) => {
   try {
     const { challengeId, code, language } = req.body;
@@ -74,7 +114,7 @@ router.post('/', auth, async (req, res) => {
           const result = await runOnJudge0(code, languageId, tc.input || '');
           const actual = normalizeOutput(result.stdout);
           const expected = normalizeOutput(tc.expectedOutput);
-          const passed = result.status?.id === 3 && actual === expected;
+          const passed = result.status?.id === 3 && compareOutputs(actual, expected);
           if (!passed) allPassed = false;
 
           testResults.push({
@@ -83,8 +123,8 @@ router.post('/', auth, async (req, res) => {
             executionTime: parseFloat(result.time) || 0,
             memoryUsed: result.memory || 0,
             passed,
-            actual: passed ? undefined : actual,
-            expected: passed ? undefined : expected,
+            actual,
+            expected,
             error: result.stderr || result.compile_output || undefined,
           });
         } catch (e) {

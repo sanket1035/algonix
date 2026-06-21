@@ -41,10 +41,10 @@ const ChallengeDetail: React.FC = () => {
   const queryClient = useQueryClient();
   
   const [activeTab, setActiveTab] = useState(0);
-  const [code, setCode] = useState('');
+  const [codesByLanguage, setCodesByLanguage] = useState<Record<string, string>>({});
   const [language, setLanguage] = useState('javascript');
-  const [lastStarter, setLastStarter] = useState('');
   const [submissionResult, setSubmissionResult] = useState<any>(null);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const { data: challenge, isLoading, error } = useQuery({
     queryKey: ['challenge', id],
@@ -59,6 +59,14 @@ const ChallengeDetail: React.FC = () => {
       setSubmissionResult(data);
       queryClient.invalidateQueries({ queryKey: ['challenge', id] });
     },
+    onError: (error: any) => {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || error.message
+        : error instanceof Error
+        ? error.message
+        : 'Submission failed';
+      setSubmissionError(message);
+    },
   });
 
   const getDefaultStarterCode = (lang: string) => {
@@ -72,16 +80,35 @@ const ChallengeDetail: React.FC = () => {
   };
 
   React.useEffect(() => {
-    const starter = challenge?.starterCode?.[language as keyof typeof challenge.starterCode] || getDefaultStarterCode(language);
-    if (!code.trim() || code === lastStarter) {
-      setCode(starter);
-      setLastStarter(starter);
-    }
-  }, [challenge, language, code, lastStarter]);
+    if (!challenge) return;
+
+    const nextCodes: Record<string, string> = {
+      javascript: challenge.starterCode?.javascript || getDefaultStarterCode('javascript'),
+      python: challenge.starterCode?.python || getDefaultStarterCode('python'),
+      java: challenge.starterCode?.java || getDefaultStarterCode('java'),
+      cpp: challenge.starterCode?.cpp || getDefaultStarterCode('cpp'),
+    };
+
+    setCodesByLanguage((prev) => ({
+      javascript: prev.javascript || nextCodes.javascript,
+      python: prev.python || nextCodes.python,
+      java: prev.java || nextCodes.java,
+      cpp: prev.cpp || nextCodes.cpp,
+    }));
+  }, [challenge]);
+
+  const code = codesByLanguage[language] || '';
+
+  const handleCodeChange = (value: string | undefined) => {
+    setCodesByLanguage((prev) => ({
+      ...prev,
+      [language]: value || '',
+    }));
+  };
 
   const handleSubmit = () => {
     if (!id || !code.trim()) return;
-    
+    setSubmissionError(null);
     submitMutation.mutate({
       challengeId: id,
       code,
@@ -276,10 +303,11 @@ const ChallengeDetail: React.FC = () => {
 
             <Box sx={{ flexGrow: 1 }}>
               <Editor
+                key={language}
                 height="100%"
                 language={getLanguageId(language)}
                 value={code}
-                onChange={(value) => setCode(value || '')}
+                onChange={handleCodeChange}
                 theme="vs-dark"
                 options={{
                   minimap: { enabled: false },
@@ -293,6 +321,12 @@ const ChallengeDetail: React.FC = () => {
             </Box>
 
             {/* Submission Result */}
+            {submissionError && (
+              <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+                <Alert severity="error">{submissionError}</Alert>
+              </Box>
+            )}
+
             {submissionResult && (
               <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
                 <Alert
@@ -300,7 +334,7 @@ const ChallengeDetail: React.FC = () => {
                   icon={submissionResult.judgeServiceUnavailable ? <Error /> : submissionResult.status === 'Accepted' ? <CheckCircle /> : <Error />}
                 >
                   <Typography variant="subtitle2">
-                    {submissionResult.status} - Score: {submissionResult.score}%
+                    {submissionResult.message} - Score: {submissionResult.score}%
                   </Typography>
                   {submissionResult.judgeServiceUnavailable && (
                     <Typography variant="body2">
