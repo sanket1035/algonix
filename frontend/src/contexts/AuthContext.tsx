@@ -19,7 +19,13 @@ interface AuthProviderProps {
 const normalizeUser = (userData: any): User => ({
   ...userData,
   id: userData.id || userData._id,
-  profile: userData.profile || {},
+  profile: {
+    firstName: '',
+    lastName: '',
+    bio: '',
+    avatar: '',
+    ...userData.profile,
+  },
   stats: {
     totalPoints: 0,
     weeklyPoints: 0,
@@ -28,10 +34,10 @@ const normalizeUser = (userData: any): User => ({
     streak: 0,
     ...userData.stats,
   },
-  badges: userData.badges || [],
-  certificates: userData.certificates || [],
-  solvedChallenges: userData.solvedChallenges || [],
-  unlockedChallenges: userData.unlockedChallenges || [],
+  badges: Array.isArray(userData.badges) ? userData.badges : [],
+  certificates: Array.isArray(userData.certificates) ? userData.certificates : [],
+  solvedChallenges: Array.isArray(userData.solvedChallenges) ? userData.solvedChallenges : [],
+  unlockedChallenges: Array.isArray(userData.unlockedChallenges) ? userData.unlockedChallenges : [],
 });
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
@@ -41,26 +47,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
-      if (token) {
+      const storedToken = localStorage.getItem('token');
+      if (storedToken) {
         try {
-          const userData = await authAPI.getCurrentUser();
+          const userData = await Promise.race([
+            authAPI.getCurrentUser(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('timeout')), 8000)
+            )
+          ]);
           setUser(normalizeUser(userData));
-        } catch (error) {
-          localStorage.removeItem('token');
-          setToken(null);
+        } catch (error: any) {
+          if (error.message === 'timeout' || error.message?.includes('Network')) {
+            // Backend sleeping (free tier) — keep token, don't logout
+            console.log('Backend waking up, keeping session...');
+          } else {
+            // Real auth error (401) — clear token
+            localStorage.removeItem('token');
+            setToken(null);
+          }
         }
       }
       setLoading(false);
     };
 
     initAuth();
-  }, [token]);
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {
       const response = await authAPI.login(email, password);
       const { token: newToken, user: userData } = response;
-      
       localStorage.setItem('token', newToken);
       setToken(newToken);
       setUser(normalizeUser(userData));
@@ -73,7 +90,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await authAPI.register(userData);
       const { token: newToken, user: newUser } = response;
-      
       localStorage.setItem('token', newToken);
       setToken(newToken);
       setUser(normalizeUser(newUser));
