@@ -30,21 +30,6 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Algonix API is running!' });
 });
 
-// ONE-TIME SEED ROUTE — remove after use
-app.get('/api/seed', async (req, res) => {
-  try {
-    const Challenge = require('./models/Challenge');
-    const count = await Challenge.countDocuments();
-    if (count > 0) return res.json({ message: `Already have ${count} challenges. Delete them first.` });
-    const sampleChallenges = require('./seedData').sampleChallenges || [];
-    if (!sampleChallenges.length) return res.json({ message: 'No challenges found in seedData.js exports' });
-    await Challenge.insertMany(sampleChallenges);
-    res.json({ message: `Seeded ${sampleChallenges.length} challenges successfully!` });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/challenges', require('./routes/challenges'));
