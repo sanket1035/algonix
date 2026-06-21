@@ -648,6 +648,8 @@ const sampleChallenges = [
   }
 ];
 
+module.exports = { sampleChallenges };
+
 async function seedDatabase() {
   try {
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://admin:password123@localhost:27017/algonix?authSource=admin');
