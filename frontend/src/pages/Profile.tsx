@@ -199,21 +199,15 @@ const Profile: React.FC = () => {
               Badges ({user?.badges?.length || 0})
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              {user?.badges?.map((badge, index) => (
+              {(user?.badges?.length ?? 0) > 0 ? user!.badges.map((badge, index) => (
                 <Card key={index} sx={{ minWidth: 200 }}>
                   <CardContent sx={{ textAlign: 'center', py: 2 }}>
-                    <Typography variant="h4" sx={{ mb: 1 }}>
-                      {badge.icon}
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                      {badge.name}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {badge.description}
-                    </Typography>
+                    <Typography variant="h4" sx={{ mb: 1 }}>{badge.icon}</Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{badge.name}</Typography>
+                    <Typography variant="body2" color="textSecondary">{badge.description}</Typography>
                   </CardContent>
                 </Card>
-              )) || (
+              )) : (
                 <Typography variant="body2" color="textSecondary">
                   No badges earned yet. Start solving problems to earn badges!
                 </Typography>
@@ -229,33 +223,25 @@ const Profile: React.FC = () => {
               Certificates ({certificates?.length || 0})
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {certificates?.map((certificate: any) => (
+              {Array.isArray(certificates) && certificates.length > 0 ? certificates.map((certificate: any) => (
                 <Card key={certificate._id}>
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <Box>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                          {certificate.name}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          {certificate.level} Level
-                        </Typography>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{certificate.name}</Typography>
+                        <Typography variant="body2" color="textSecondary">{certificate.level} Level</Typography>
                         <Typography variant="body2" color="textSecondary">
                           Earned on {new Date(certificate.earnedAt).toLocaleDateString()}
                         </Typography>
                       </Box>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<Download />}
-                        onClick={() => handleDownloadCertificate(certificate._id, certificate.name)}
-                      >
+                      <Button variant="outlined" size="small" startIcon={<Download />}
+                        onClick={() => handleDownloadCertificate(certificate._id, certificate.name)}>
                         Download
                       </Button>
                     </Box>
                   </CardContent>
                 </Card>
-              )) || (
+              )) : (
                 <Typography variant="body2" color="textSecondary">
                   No certificates earned yet. Complete milestone challenges to earn certificates!
                 </Typography>
