@@ -16,6 +16,24 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+const normalizeUser = (userData: any): User => ({
+  ...userData,
+  id: userData.id || userData._id,
+  profile: userData.profile || {},
+  stats: {
+    totalPoints: 0,
+    weeklyPoints: 0,
+    level: 1,
+    solvedProblems: 0,
+    streak: 0,
+    ...userData.stats,
+  },
+  badges: userData.badges || [],
+  certificates: userData.certificates || [],
+  solvedChallenges: userData.solvedChallenges || [],
+  unlockedChallenges: userData.unlockedChallenges || [],
+});
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
@@ -26,7 +44,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (token) {
         try {
           const userData = await authAPI.getCurrentUser();
-          setUser(userData);
+          setUser(normalizeUser(userData));
         } catch (error) {
           localStorage.removeItem('token');
           setToken(null);
@@ -45,7 +63,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       localStorage.setItem('token', newToken);
       setToken(newToken);
-      setUser(userData);
+      setUser(normalizeUser(userData));
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Login failed');
     }
@@ -58,7 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       localStorage.setItem('token', newToken);
       setToken(newToken);
-      setUser(newUser);
+      setUser(normalizeUser(newUser));
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Registration failed');
     }

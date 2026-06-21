@@ -45,7 +45,12 @@ router.post('/register', async (req, res) => {
         username: user.username,
         email: user.email,
         profile: user.profile,
-        stats: user.stats
+        stats: user.stats,
+        badges: user.badges,
+        certificates: user.certificates,
+        solvedChallenges: user.solvedChallenges,
+        unlockedChallenges: user.unlockedChallenges,
+        isAdmin: user.isAdmin
       }
     });
   } catch (error) {
@@ -101,7 +106,8 @@ router.get('/me', auth, async (req, res) => {
       .populate('solvedChallenges', 'title difficulty points')
       .select('-password');
     
-    res.json(user);
+    const u = user.toObject();
+    res.json({ ...u, id: u._id });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
