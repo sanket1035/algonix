@@ -47,6 +47,17 @@ router.post('/', auth, async (req, res) => {
     const challenge = await Challenge.findById(challengeId);
     if (!challenge) return res.status(404).json({ message: 'Challenge not found' });
 
+    const user = await User.findById(req.user._id);
+    const isUnlocked = user.unlockedChallenges.includes(challenge._id) ||
+                      challenge.fastTrackUnlock ||
+                      user.solvedChallenges.some(solvedId =>
+                        challenge.prerequisites.includes(solvedId)
+                      );
+
+    if (!isUnlocked) {
+      return res.status(403).json({ message: 'Challenge not unlocked' });
+    }
+
     const languageId = LANGUAGE_IDS[language] || 63;
     const visibleTestCases = challenge.testCases.filter(tc => !tc.isHidden);
     const testCasesToRun = visibleTestCases.length > 0 ? visibleTestCases : challenge.testCases;
@@ -96,6 +107,8 @@ router.post('/', auth, async (req, res) => {
     }
 
     const judgeServiceUnavailable = !(process.env.RAPIDAPI_KEY && process.env.RAPIDAPI_KEY !== 'your_rapidapi_key_here');
+    const correct = allPassed;
+    const message = allPassed ? 'Accepted' : judgeServiceUnavailable ? 'Judge service unavailable' : 'Wrong Answer';
     const status = allPassed ? 'Accepted' : 'Wrong Answer';
     const score = allPassed ? 100 : Math.round((testResults.filter(t => t.passed).length / testResults.length) * 100);
     const pointsEarned = allPassed ? challenge.points : 0;
@@ -142,7 +155,7 @@ router.post('/', auth, async (req, res) => {
       score,
     });
 
-    res.json({ submissionId: submission._id, status, score, pointsEarned, testResults, judgeServiceUnavailable });
+    res.json({ submissionId: submission._id, status, message, correct, score, pointsEarned, testResults, judgeServiceUnavailable });
 
   } catch (error) {
     console.error('Submission error:', error);

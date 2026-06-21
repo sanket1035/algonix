@@ -44,7 +44,7 @@ const ChallengeDetail: React.FC = () => {
   const [language, setLanguage] = useState('javascript');
   const [submissionResult, setSubmissionResult] = useState<any>(null);
 
-  const { data: challenge, isLoading } = useQuery({
+  const { data: challenge, isLoading, error } = useQuery({
     queryKey: ['challenge', id],
     queryFn: () => challengesAPI.getChallenge(id!),
     enabled: !!id,
@@ -105,6 +105,15 @@ const ChallengeDetail: React.FC = () => {
     );
   }
 
+  if (error) {
+    const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load challenge';
+    return (
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Alert severity="error">{errorMessage}</Alert>
+      </Container>
+    );
+  }
+
   if (!challenge) {
     return (
       <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -126,6 +135,12 @@ const ChallengeDetail: React.FC = () => {
                 </Typography>
                 {challenge.isSolved && <CheckCircle color="success" />}
               </Box>
+
+              {!challenge.isUnlocked && (
+                <Alert severity="warning" sx={{ mb: 3 }}>
+                  This challenge is locked. Solve the prerequisite challenges or take the skill test to unlock it.
+                </Alert>
+              )}
 
               <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap' }}>
                 <Chip
@@ -233,7 +248,7 @@ const ChallengeDetail: React.FC = () => {
                   variant="contained"
                   startIcon={<Send />}
                   onClick={handleSubmit}
-                  disabled={submitMutation.isPending || !code.trim()}
+                  disabled={submitMutation.isPending || !code.trim() || !challenge.isUnlocked}
                 >
                   {submitMutation.isPending ? <CircularProgress size={20} /> : 'Submit'}
                 </Button>

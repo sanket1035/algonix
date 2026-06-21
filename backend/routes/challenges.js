@@ -58,17 +58,14 @@ router.get('/:id', auth, async (req, res) => {
                         challenge.prerequisites.includes(solvedId)
                       );
 
-    if (!isUnlocked) {
-      return res.status(403).json({ message: 'Challenge not unlocked' });
-    }
-
     // Hide hidden test cases from response
     const challengeData = challenge.toObject();
     challengeData.testCases = challengeData.testCases.filter(tc => !tc.isHidden);
 
     res.json({
       ...challengeData,
-      isSolved: user.solvedChallenges.includes(challenge._id)
+      isSolved: user.solvedChallenges.includes(challenge._id),
+      isUnlocked,
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
