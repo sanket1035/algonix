@@ -32,7 +32,6 @@ const Dashboard: React.FC = () => {
   const { data: challenges } = useQuery({
     queryKey: ['challenges'],
     queryFn: () => challengesAPI.getChallenges(),
-    refetchInterval: 5000, // Refresh every 5 seconds
   });
 
   const { data: leaderboardData } = useQuery({
@@ -67,7 +66,7 @@ const Dashboard: React.FC = () => {
   };
 
   const getDifficultyStats = () => {
-    if (!challenges || !user) return {};
+    if (!Array.isArray(challenges) || !user) return {};
     
     const stats: Record<string, { solved: number; total: number }> = {};
     
