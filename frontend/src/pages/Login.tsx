@@ -37,7 +37,7 @@ const Login: React.FC = () => {
 
     try {
       await login(formData.email, formData.password);
-      window.location.href = '/dashboard';
+      navigate('/dashboard', { replace: true });
     } catch (err: any) {
       setError(err.message);
     } finally {
