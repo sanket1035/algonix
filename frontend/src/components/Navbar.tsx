@@ -113,7 +113,7 @@ const Navbar: React.FC = () => {
             color="inherit"
           >
             {user?.profile?.avatar ? (
-              <Avatar src={user.profile.avatar} sx={{ width: 32, height: 32 }} />
+              <Avatar src={user?.profile?.avatar} sx={{ width: 32, height: 32 }} />
             ) : (
               <AccountCircle />
             )}

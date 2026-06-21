@@ -170,7 +170,7 @@ const Leaderboard: React.FC = () => {
                   </TableCell>
                   <TableCell align="right">
                     <Chip
-                      label={`Level ${entry.stats.level}`}
+                      label={`Level ${entry.stats?.level ?? 1}`}
                       size="small"
                       color="secondary"
                     />
@@ -178,7 +178,7 @@ const Leaderboard: React.FC = () => {
                   {activeTab === 1 && (
                     <TableCell align="right">
                       <Typography variant="body2">
-                        {entry.stats.solvedProblems || 0}
+                        {entry.stats?.solvedProblems ?? 0}
                       </Typography>
                     </TableCell>
                   )}
