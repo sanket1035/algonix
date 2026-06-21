@@ -91,7 +91,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const updateProfile = async (profileData: Partial<User['profile']>) => {
     try {
       const updatedUser = await authAPI.updateProfile(profileData);
-      setUser(updatedUser);
+      setUser(normalizeUser(updatedUser));
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Profile update failed');
     }

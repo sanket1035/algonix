@@ -29,7 +29,8 @@ const SkillTestSimple: React.FC = () => {
   const getTest = useMutation({
     mutationFn: (difficulty: string) => challengesAPI.getSkillTest(difficulty),
     onSuccess: (data) => {
-      setQuestions(data.questions || data);
+      const qs = Array.isArray(data) ? data : Array.isArray(data?.questions) ? data.questions : [];
+      setQuestions(qs);
       setStep(1);
     },
   });
@@ -92,7 +93,7 @@ const SkillTestSimple: React.FC = () => {
                   value={answers[i]?.toString() || ''}
                   onChange={(e) => setAnswers({...answers, [i]: parseInt(e.target.value)})}
                 >
-                  {q.options.map((opt: string, j: number) => (
+                  {(q.options || []).map((opt: string, j: number) => (
                     <FormControlLabel key={j} value={j.toString()} control={<Radio />} label={opt} />
                   ))}
                 </RadioGroup>

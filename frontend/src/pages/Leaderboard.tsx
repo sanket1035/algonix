@@ -165,7 +165,7 @@ const Leaderboard: React.FC = () => {
                   </TableCell>
                   <TableCell align="right">
                     <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                      {entry.stats[pointsField] || 0}
+                      {entry.stats?.[pointsField] || 0}
                     </Typography>
                   </TableCell>
                   <TableCell align="right">

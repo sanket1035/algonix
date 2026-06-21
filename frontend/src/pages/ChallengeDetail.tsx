@@ -150,7 +150,7 @@ const ChallengeDetail: React.FC = () => {
               </TabPanel>
 
               <TabPanel value={activeTab} index={1}>
-                {challenge.examples.map((example, index) => (
+                {(Array.isArray(challenge.examples) ? challenge.examples : []).map((example, index) => (
                   <Card key={index} sx={{ mb: 2 }}>
                     <CardContent>
                       <Typography variant="h6" gutterBottom>
@@ -275,11 +275,9 @@ const ChallengeDetail: React.FC = () => {
                   )}
                 </Alert>
 
-                {submissionResult.testResults && (
+                {Array.isArray(submissionResult.testResults) && (
                   <Box sx={{ mt: 2 }}>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Test Results:
-                    </Typography>
+                    <Typography variant="subtitle2" gutterBottom>Test Results:</Typography>
                     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                       {submissionResult.testResults.map((result: any, index: number) => (
                         <Chip
