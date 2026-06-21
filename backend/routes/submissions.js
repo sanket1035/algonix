@@ -108,9 +108,13 @@ router.post('/', auth, async (req, res) => {
     }
 
     const judgeServiceUnavailable = !(process.env.RAPIDAPI_KEY && process.env.RAPIDAPI_KEY !== 'your_rapidapi_key_here');
-    const correct = allPassed;
-    const message = allPassed ? 'Accepted' : judgeServiceUnavailable ? 'Judge service unavailable' : 'Wrong Answer';
-    const status = allPassed ? 'Accepted' : 'Wrong Answer';
+    const correct = allPassed && !judgeServiceUnavailable;
+    const message = allPassed
+      ? 'Accepted'
+      : judgeServiceUnavailable
+      ? 'Judge service unavailable'
+      : 'Wrong Answer';
+    const status = judgeServiceUnavailable ? 'Judge Service Unavailable' : allPassed ? 'Accepted' : 'Wrong Answer';
     const score = allPassed ? 100 : Math.round((testResults.filter(t => t.passed).length / testResults.length) * 100);
     const pointsEarned = allPassed ? challenge.points : 0;
 
