@@ -203,7 +203,7 @@ const Dashboard: React.FC = () => {
                 ))
               ) : (
                 <Typography variant="body2" color="textSecondary">
-                  No badges earned yet. Problems solved: {user?.stats.solvedProblems || 0}
+                  No badges earned yet. Problems solved: {user?.stats?.solvedProblems ?? 0}
                 </Typography>
               )}
             </Box>
