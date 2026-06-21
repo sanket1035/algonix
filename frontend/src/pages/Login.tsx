@@ -127,10 +127,9 @@ const Login: React.FC = () => {
               <Typography variant="body2">
                 Don't have an account?{' '}
                 <Link
-                  component="button"
                   variant="body2"
                   onClick={() => navigate('/register')}
-                  sx={{ textDecoration: 'none' }}
+                  sx={{ textDecoration: 'none', cursor: 'pointer' }}
                 >
                   Sign up here
                 </Link>
