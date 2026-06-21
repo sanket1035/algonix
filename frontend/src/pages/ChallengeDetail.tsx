@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import {
   Container,
   Grid,
@@ -106,7 +107,12 @@ const ChallengeDetail: React.FC = () => {
   }
 
   if (error) {
-    const errorMessage = error?.response?.data?.message || error?.message || 'Unable to load challenge';
+    const errorMessage = axios.isAxiosError(error)
+      ? error.response?.data?.message || error.message
+      : error instanceof Error
+      ? error.message
+      : 'Unable to load challenge';
+
     return (
       <Container maxWidth="xl" sx={{ py: 4 }}>
         <Alert severity="error">{errorMessage}</Alert>
