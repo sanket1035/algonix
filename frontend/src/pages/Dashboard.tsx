@@ -272,7 +272,8 @@ const Dashboard: React.FC = () => {
                 onClick={async () => {
                   try {
                     const token = localStorage.getItem('token');
-                    const response = await fetch('/api/auth/fix-badges', {
+                    const apiUrl = process.env.REACT_APP_API_URL || '/api';
+                    const response = await fetch(`${apiUrl}/auth/fix-badges`, {
                       method: 'POST',
                       headers: {
                         'Authorization': `Bearer ${token}`,

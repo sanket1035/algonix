@@ -56,7 +56,7 @@ const Challenges: React.FC = () => {
   const filteredChallenges = Array.isArray(challenges) ? challenges.filter((challenge: Challenge) =>
     challenge.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     challenge.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    challenge.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+    (challenge.tags || []).some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
   ) : [];
 
   const groupedChallenges = filteredChallenges.reduce((acc: Record<string, Challenge[]>, challenge: Challenge) => {
@@ -192,7 +192,7 @@ const Challenges: React.FC = () => {
                           variant="outlined"
                           size="small"
                         />
-                        {challenge.tags.slice(0, 2).map((tag) => (
+                        {(challenge.tags || []).slice(0, 2).map((tag) => (
                           <Chip
                             key={tag}
                             label={tag}
