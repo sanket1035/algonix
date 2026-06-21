@@ -81,15 +81,17 @@ router.post('/', auth, async (req, res) => {
         }
       }
     } else {
-      // No Judge0 key — do basic non-empty code check
-      const hasLogic = code.trim().length > 20;
-      allPassed = hasLogic;
+      // No Judge0 key — do not mark code as correct without actual execution
+      const reason = 'Judge service unavailable';
+      console.warn('Judge0 API key missing: unable to verify submission.');
+      allPassed = false;
       testResults = testCasesToRun.map((_, i) => ({
         testCase: i + 1,
-        status: hasLogic ? 'Accepted' : 'Wrong Answer',
-        passed: hasLogic,
+        status: 'Wrong Answer',
+        passed: false,
         executionTime: 0,
         memoryUsed: 0,
+        error: reason,
       }));
     }
 
