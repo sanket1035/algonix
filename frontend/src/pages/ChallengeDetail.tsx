@@ -43,6 +43,7 @@ const ChallengeDetail: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState('javascript');
+  const [lastStarter, setLastStarter] = useState('');
   const [submissionResult, setSubmissionResult] = useState<any>(null);
 
   const { data: challenge, isLoading, error } = useQuery({
@@ -62,20 +63,21 @@ const ChallengeDetail: React.FC = () => {
 
   const getDefaultStarterCode = (lang: string) => {
     const templates: Record<string, string> = {
-      javascript: `// Write your JavaScript solution here\nfunction solve(nums, target) {\n  // Example: return indices of two numbers that add up to target\n  const map = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const complement = target - nums[i];\n    if (map.has(complement)) return [map.get(complement), i];\n    map.set(nums[i], i);\n  }\n  return [];\n}`,
-      python: `# Write your Python solution here\ndef solve(nums, target):\n    # Example: return indices of two numbers that add up to target\n    lookup = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in lookup:\n            return [lookup[complement], i]\n        lookup[num] = i\n    return []`,
-      java: `// Write your Java solution here\nimport java.util.*;\npublic class Solution {\n    public static int[] solve(int[] nums, int target) {\n        Map<Integer, Integer> map = new HashMap<>();\n        for (int i = 0; i < nums.length; i++) {\n            int complement = target - nums[i];\n            if (map.containsKey(complement)) {\n                return new int[] { map.get(complement), i };\n            }\n            map.put(nums[i], i);\n        }\n        return new int[] {};\n    }\n}`,
-      cpp: `// Write your C++ solution here\n#include <bits/stdc++.h>\nusing namespace std;\nvector<int> solve(vector<int>& nums, int target) {\n    unordered_map<int,int> mp;\n    for (int i = 0; i < nums.size(); i++) {\n        int complement = target - nums[i];\n        if (mp.count(complement)) return {mp[complement], i};\n        mp[nums[i]] = i;\n    }\n    return {};\n}`,
+      javascript: `// Write your JavaScript solution here\nfunction solve(nums, target) {\n  // TODO: implement solution\n  return [];\n}`,
+      python: `# Write your Python solution here\ndef solve(nums, target):\n    # TODO: implement solution\n    pass`,
+      java: `// Write your Java solution here\nimport java.util.*;\npublic class Solution {\n    public static int[] solve(int[] nums, int target) {\n        // TODO: implement solution\n        return new int[0];\n    }\n}`,
+      cpp: `// Write your C++ solution here\n#include <vector>\nusing namespace std;\nvector<int> solve(vector<int>& nums, int target) {\n    // TODO: implement solution\n    return {};\n}`,
     };
     return templates[lang] || templates.javascript;
   };
 
   React.useEffect(() => {
     const starter = challenge?.starterCode?.[language as keyof typeof challenge.starterCode] || getDefaultStarterCode(language);
-    if (!code.trim()) {
+    if (!code.trim() || code === lastStarter) {
       setCode(starter);
+      setLastStarter(starter);
     }
-  }, [challenge, language]);
+  }, [challenge, language, code, lastStarter]);
 
   const handleSubmit = () => {
     if (!id || !code.trim()) return;

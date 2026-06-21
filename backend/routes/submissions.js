@@ -114,7 +114,7 @@ router.post('/', auth, async (req, res) => {
       : judgeServiceUnavailable
       ? 'Judge service unavailable'
       : 'Wrong Answer';
-    const status = judgeServiceUnavailable ? 'Judge Service Unavailable' : allPassed ? 'Accepted' : 'Wrong Answer';
+    const status = allPassed ? 'Accepted' : 'Wrong Answer';
     const score = allPassed ? 100 : Math.round((testResults.filter(t => t.passed).length / testResults.length) * 100);
     const pointsEarned = allPassed ? challenge.points : 0;
 
