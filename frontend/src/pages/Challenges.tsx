@@ -53,11 +53,11 @@ const Challenges: React.FC = () => {
     }
   };
 
-  const filteredChallenges = challenges?.filter((challenge: Challenge) =>
+  const filteredChallenges = Array.isArray(challenges) ? challenges.filter((challenge: Challenge) =>
     challenge.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     challenge.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     challenge.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-  ) || [];
+  ) : [];
 
   const groupedChallenges = filteredChallenges.reduce((acc: Record<string, Challenge[]>, challenge: Challenge) => {
     if (!acc[challenge.difficulty]) {

@@ -2,6 +2,8 @@
 
 A gamified coding skill development platform. Practice algorithms, earn badges, climb leaderboards, and unlock challenges through skill tests or progressive completion.
 
+🔗 **Live Demo:** https://algonix-frontend.onrender.com
+
 ## Features
 
 - **Coding Challenges** — Multi-difficulty (Beginner → Expert) with progressive unlocking
