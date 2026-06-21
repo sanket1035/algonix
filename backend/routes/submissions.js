@@ -50,6 +50,7 @@ router.post('/', auth, async (req, res) => {
     const user = await User.findById(req.user._id);
     const isUnlocked = user.unlockedChallenges.includes(challenge._id) ||
                       challenge.fastTrackUnlock ||
+                      challenge.difficulty === 'Beginner' ||
                       user.solvedChallenges.some(solvedId =>
                         challenge.prerequisites.includes(solvedId)
                       );
