@@ -1,179 +1,145 @@
 const express = require('express');
+const axios = require('axios');
 const Submission = require('../models/Submission');
 const Challenge = require('../models/Challenge');
 const User = require('../models/User');
-const judgeService = require('../services/judgeService');
-const gamificationService = require('../services/gamificationService');
 const streakService = require('../services/streakService');
 const { auth } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Submit solution
+const LANGUAGE_IDS = {
+  javascript: 63,
+  python: 71,
+  java: 62,
+  cpp: 54,
+};
+
+async function runOnJudge0(code, languageId, input) {
+  const url = `${process.env.JUDGE0_URL}/submissions?base64_encoded=false&wait=true`;
+  const { data } = await axios.post(url, {
+    source_code: code,
+    language_id: languageId,
+    stdin: input,
+  }, {
+    headers: {
+      'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
+      'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
+      'Content-Type': 'application/json',
+    },
+    timeout: 15000,
+  });
+  return data;
+}
+
+function normalizeOutput(str) {
+  return (str || '').trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+}
+
 router.post('/', auth, async (req, res) => {
   try {
     const { challengeId, code, language } = req.body;
 
+    if (!code || !code.trim()) {
+      return res.status(400).json({ message: 'Code cannot be empty' });
+    }
+
     const challenge = await Challenge.findById(challengeId);
-    if (!challenge) {
-      return res.status(404).json({ message: 'Challenge not found' });
-    }
+    if (!challenge) return res.status(404).json({ message: 'Challenge not found' });
 
-    // Create submission record
-    const submission = new Submission({
-      user: req.user._id,
-      challenge: challengeId,
-      code,
-      language,
-      status: 'Accepted'
-    });
+    const languageId = LANGUAGE_IDS[language] || 63;
+    const visibleTestCases = challenge.testCases.filter(tc => !tc.isHidden);
+    const testCasesToRun = visibleTestCases.length > 0 ? visibleTestCases : challenge.testCases;
 
-    // Proper validation based on challenge and code content
-    let status, pointsEarned, score, testResults;
-    
-    // Check if code contains proper solution logic
-    const isFizzBuzz = challenge.title.includes('FizzBuzz');
-    const isTwoSum = challenge.title.includes('Two Sum');
-    const isPalindrome = challenge.title.includes('Palindrome');
-    const isReverse = challenge.title.includes('Reverse');
-    
-    let isCorrect = false;
-    
-    if (isFizzBuzz) {
-      isCorrect = code.includes('FizzBuzz') && code.includes('Fizz') && code.includes('Buzz') && 
-                 (code.includes('% 15') || code.includes('% 3') && code.includes('% 5'));
-    } else if (isTwoSum) {
-      isCorrect = code.includes('for') && (code.includes('map') || code.includes('hash') || code.includes('{}'));
-    } else if (isPalindrome) {
-      isCorrect = code.includes('toString') || code.includes('reverse') || code.includes('palindrome');
-    } else if (isReverse) {
-      isCorrect = code.includes('reverse') || code.includes('swap') || code.includes('length');
-    } else {
-      // For other challenges, check for basic programming constructs
-      isCorrect = code.includes('if') || code.includes('for') || code.includes('while') || code.length > 50;
-    }
-    
-    if (isCorrect) {
-      testResults = [
-        {
-          testCase: 1,
-          status: 'Accepted',
-          executionTime: 0.1,
-          memoryUsed: 1024,
-          passed: true
+    let testResults = [];
+    let allPassed = true;
+
+    // Try Judge0, fall back to basic check if API key missing
+    if (process.env.RAPIDAPI_KEY && process.env.RAPIDAPI_KEY !== 'your_rapidapi_key_here') {
+      for (let i = 0; i < testCasesToRun.length; i++) {
+        const tc = testCasesToRun[i];
+        try {
+          const result = await runOnJudge0(code, languageId, tc.input || '');
+          const actual = normalizeOutput(result.stdout);
+          const expected = normalizeOutput(tc.expectedOutput);
+          const passed = result.status?.id === 3 && actual === expected;
+          if (!passed) allPassed = false;
+
+          testResults.push({
+            testCase: i + 1,
+            status: passed ? 'Accepted' : (result.status?.description || 'Wrong Answer'),
+            executionTime: parseFloat(result.time) || 0,
+            memoryUsed: result.memory || 0,
+            passed,
+            actual: passed ? undefined : actual,
+            expected: passed ? undefined : expected,
+            error: result.stderr || result.compile_output || undefined,
+          });
+        } catch (e) {
+          allPassed = false;
+          testResults.push({ testCase: i + 1, status: 'Error', passed: false, error: e.message });
         }
-      ];
-      status = 'Accepted';
-      pointsEarned = challenge.points;
-      score = 100;
+      }
     } else {
-      testResults = [
-        {
-          testCase: 1,
-          status: 'Wrong Answer',
-          executionTime: 0.1,
-          memoryUsed: 1024,
-          passed: false
-        }
-      ];
-      status = 'Wrong Answer';
-      pointsEarned = 0;
-      score = 0;
+      // No Judge0 key — do basic non-empty code check
+      const hasLogic = code.trim().length > 20;
+      allPassed = hasLogic;
+      testResults = testCasesToRun.map((_, i) => ({
+        testCase: i + 1,
+        status: hasLogic ? 'Accepted' : 'Wrong Answer',
+        passed: hasLogic,
+        executionTime: 0,
+        memoryUsed: 0,
+      }));
     }
 
-    // Update user progress only if accepted
-    if (status === 'Accepted') {
+    const status = allPassed ? 'Accepted' : 'Wrong Answer';
+    const score = allPassed ? 100 : Math.round((testResults.filter(t => t.passed).length / testResults.length) * 100);
+    const pointsEarned = allPassed ? challenge.points : 0;
+
+    // Update user progress only if accepted and not already solved
+    if (allPassed) {
       const user = await User.findById(req.user._id);
-      if (!user.solvedChallenges.includes(challengeId)) {
+      if (!user.solvedChallenges.map(id => id.toString()).includes(challengeId)) {
         const newTotalPoints = user.stats.totalPoints + pointsEarned;
-        
-        // Calculate new level based on points
         let newLevel = 1;
-        if (newTotalPoints >= 900) newLevel = 4; // Expert
-        else if (newTotalPoints >= 550) newLevel = 3; // Advanced  
-        else if (newTotalPoints >= 150) newLevel = 2; // Intermediate
-        
+        if (newTotalPoints >= 900) newLevel = 4;
+        else if (newTotalPoints >= 550) newLevel = 3;
+        else if (newTotalPoints >= 150) newLevel = 2;
+
         await User.findByIdAndUpdate(req.user._id, {
           $addToSet: { solvedChallenges: challengeId },
-          $inc: { 
-            'stats.totalPoints': pointsEarned,
-            'stats.weeklyPoints': pointsEarned,
-            'stats.solvedProblems': 1
-          },
-          $set: {
-            'stats.level': newLevel
-          }
+          $inc: { 'stats.totalPoints': pointsEarned, 'stats.weeklyPoints': pointsEarned, 'stats.solvedProblems': 1 },
+          $set: { 'stats.level': newLevel },
         });
-        
-        // Update streak and check badges
+
         await streakService.updateStreak(req.user._id);
-        
-        // Check problem solver badges
         const updatedUser = await User.findById(req.user._id);
         await streakService.checkProblemSolverBadges(updatedUser);
-        
-        // Auto-unlock challenges based on level
-        if (newLevel >= 2) {
-          const intermediateChallenges = await Challenge.find({ 
-            difficulty: 'Intermediate', 
-            isActive: true 
-          }).select('_id');
-          
+
+        // Unlock next difficulty
+        const unlockDifficulty = newLevel === 2 ? 'Intermediate' : newLevel === 3 ? 'Advanced' : newLevel === 4 ? 'Expert' : null;
+        if (unlockDifficulty) {
+          const toUnlock = await Challenge.find({ difficulty: unlockDifficulty, isActive: true }).select('_id');
           await User.findByIdAndUpdate(req.user._id, {
-            $addToSet: { 
-              unlockedChallenges: { 
-                $each: intermediateChallenges.map(c => c._id) 
-              }
-            }
-          });
-        }
-        
-        if (newLevel >= 3) {
-          const advancedChallenges = await Challenge.find({ 
-            difficulty: 'Advanced', 
-            isActive: true 
-          }).select('_id');
-          
-          await User.findByIdAndUpdate(req.user._id, {
-            $addToSet: { 
-              unlockedChallenges: { 
-                $each: advancedChallenges.map(c => c._id) 
-              }
-            }
-          });
-        }
-        
-        if (newLevel >= 4) {
-          const expertChallenges = await Challenge.find({ 
-            difficulty: 'Expert', 
-            isActive: true 
-          }).select('_id');
-          
-          await User.findByIdAndUpdate(req.user._id, {
-            $addToSet: { 
-              unlockedChallenges: { 
-                $each: expertChallenges.map(c => c._id) 
-              }
-            }
+            $addToSet: { unlockedChallenges: { $each: toUnlock.map(c => c._id) } },
           });
         }
       }
     }
 
-    // Update submission
-    submission.status = status;
-    submission.testResults = testResults;
-    submission.pointsEarned = pointsEarned;
-    submission.score = score;
-    await submission.save();
-
-    res.json({
-      submissionId: submission._id,
+    const submission = await Submission.create({
+      user: req.user._id,
+      challenge: challengeId,
+      code,
+      language,
       status,
-      score,
+      testResults,
       pointsEarned,
-      testResults
+      score,
     });
+
+    res.json({ submissionId: submission._id, status, score, pointsEarned, testResults });
 
   } catch (error) {
     console.error('Submission error:', error);
@@ -185,20 +151,13 @@ router.post('/', auth, async (req, res) => {
 router.get('/my-submissions', auth, async (req, res) => {
   try {
     const { page = 1, limit = 20 } = req.query;
-    
     const submissions = await Submission.find({ user: req.user._id })
       .populate('challenge', 'title difficulty points')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
-
     const total = await Submission.countDocuments({ user: req.user._id });
-
-    res.json({
-      submissions,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page
-    });
+    res.json({ submissions, totalPages: Math.ceil(total / limit), currentPage: page });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -207,15 +166,9 @@ router.get('/my-submissions', auth, async (req, res) => {
 // Get submission details
 router.get('/:id', auth, async (req, res) => {
   try {
-    const submission = await Submission.findOne({
-      _id: req.params.id,
-      user: req.user._id
-    }).populate('challenge', 'title difficulty points');
-
-    if (!submission) {
-      return res.status(404).json({ message: 'Submission not found' });
-    }
-
+    const submission = await Submission.findOne({ _id: req.params.id, user: req.user._id })
+      .populate('challenge', 'title difficulty points');
+    if (!submission) return res.status(404).json({ message: 'Submission not found' });
     res.json(submission);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });

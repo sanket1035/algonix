@@ -15,9 +15,18 @@ router.get('/', auth, async (req, res) => {
     if (category) filter.category = category;
 
     const challenges = await Challenge.find(filter).sort({ order: 1, difficulty: 1 });
+
+    // Deduplicate by title (in case of duplicate seed runs)
+    const seen = new Set();
+    const uniqueChallenges = challenges.filter(c => {
+      if (seen.has(c.title)) return false;
+      seen.add(c.title);
+      return true;
+    });
+
     const user = await User.findById(req.user._id);
 
-    const challengesWithProgress = challenges.map(challenge => ({
+    const challengesWithProgress = uniqueChallenges.map(challenge => ({
       ...challenge.toObject(),
       isSolved: user.solvedChallenges.includes(challenge._id),
       isUnlocked: user.unlockedChallenges.includes(challenge._id) || 
