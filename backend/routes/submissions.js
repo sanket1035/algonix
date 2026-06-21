@@ -95,6 +95,7 @@ router.post('/', auth, async (req, res) => {
       }));
     }
 
+    const judgeServiceUnavailable = !(process.env.RAPIDAPI_KEY && process.env.RAPIDAPI_KEY !== 'your_rapidapi_key_here');
     const status = allPassed ? 'Accepted' : 'Wrong Answer';
     const score = allPassed ? 100 : Math.round((testResults.filter(t => t.passed).length / testResults.length) * 100);
     const pointsEarned = allPassed ? challenge.points : 0;
@@ -141,7 +142,7 @@ router.post('/', auth, async (req, res) => {
       score,
     });
 
-    res.json({ submissionId: submission._id, status, score, pointsEarned, testResults });
+    res.json({ submissionId: submission._id, status, score, pointsEarned, testResults, judgeServiceUnavailable });
 
   } catch (error) {
     console.error('Submission error:', error);

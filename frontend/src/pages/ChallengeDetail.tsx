@@ -262,12 +262,17 @@ const ChallengeDetail: React.FC = () => {
             {submissionResult && (
               <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
                 <Alert
-                  severity={submissionResult.status === 'Accepted' ? 'success' : 'error'}
-                  icon={submissionResult.status === 'Accepted' ? <CheckCircle /> : <Error />}
+                  severity={submissionResult.judgeServiceUnavailable ? 'warning' : submissionResult.status === 'Accepted' ? 'success' : 'error'}
+                  icon={submissionResult.judgeServiceUnavailable ? <Error /> : submissionResult.status === 'Accepted' ? <CheckCircle /> : <Error />}
                 >
                   <Typography variant="subtitle2">
                     {submissionResult.status} - Score: {submissionResult.score}%
                   </Typography>
+                  {submissionResult.judgeServiceUnavailable && (
+                    <Typography variant="body2">
+                      Judge service unavailable. Submission could not be verified. Please try again later.
+                    </Typography>
+                  )}
                   {submissionResult.pointsEarned > 0 && (
                     <Typography variant="body2">
                       Points earned: {submissionResult.pointsEarned}
