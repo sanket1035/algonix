@@ -13,9 +13,9 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
-      - key: JUDGE0_URL
-        value: https://judge0-ce.p.rapidapi.com
-      - key: RAPIDAPI_KEY
         sync: false
+      - key: PISTON_URL
+        sync: false
+      # Piston is used for execution, so no Judge0/RapidAPI env vars are required
       - key: FRONTEND_URL
         sync: false
