@@ -15,6 +15,13 @@ const LANGUAGE_MAP = {
   cpp: { name: 'cpp', extension: 'cpp' },
 };
 
+const LANGUAGE_VERSIONS = {
+  javascript: '18.15.0',
+  python: '3.10.0',
+  java: '15.0.2',
+  cpp: '10.2.0',
+};
+
 const PISTON_EXECUTE_URL = process.env.PISTON_URL || 'https://emkc.org/api/v2/piston/execute';
 
 async function runPiston(code, language, input) {
@@ -22,6 +29,7 @@ async function runPiston(code, language, input) {
 
   const { data } = await axios.post(PISTON_EXECUTE_URL, {
     language: runtime.name,
+    version: LANGUAGE_VERSIONS[language] || '*',
     files: [{ name: `Main.${runtime.extension}`, content: code }],
     stdin: input || '',
   }, {
@@ -127,7 +135,7 @@ router.post('/', auth, async (req, res) => {
       try {
         const result = await runPiston(code, language, tc.input || '');
         const actual = normalizeOutput(result.stdout || result.output);
-        const expected = normalizeOutput(tc.expectedOutput);
+        const expected = normalizeOutput(tc.expectedOutput || tc.output);
         const passed = (result.code === 0 || result.code === undefined) && compareOutputs(actual, expected);
         if (!passed) allPassed = false;
 
