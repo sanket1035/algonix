@@ -83,7 +83,12 @@ async function runCodeExecution(code, language, input) {
   if (GLOT_API_TOKEN) {
     return runGlot(code, language, input);
   }
-  return runPiston(code, language, input);
+
+  if (PISTON_EXECUTE_URL && PISTON_EXECUTE_URL !== 'https://emkc.org/api/v2/piston/execute') {
+    return runPiston(code, language, input);
+  }
+
+  throw new Error('Execution service is not configured. Set GLOT_API_TOKEN for Glot or PISTON_URL for a self-hosted Piston instance.');
 }
 
 function normalizeOutput(str) {
@@ -167,6 +172,7 @@ router.post('/', auth, async (req, res) => {
     let testResults = [];
     let allPassed = true;
     let judgeServiceUnavailable = false;
+    let executionErrorMessage = null;
 
     for (let i = 0; i < testCasesToRun.length; i++) {
       const tc = testCasesToRun[i];
@@ -188,24 +194,26 @@ router.post('/', auth, async (req, res) => {
           error: result.stderr || undefined,
         });
       } catch (e) {
+        const errorMessage = e.response?.data?.message || e.message;
         console.error('Code execution request failed for submission:', {
           challengeId,
           language,
           testCase: i + 1,
-          error: e.message,
+          error: errorMessage,
           stack: e.stack,
           responseData: e.response?.data,
           responseStatus: e.response?.status,
         });
         allPassed = false;
         judgeServiceUnavailable = true;
+        executionErrorMessage = executionErrorMessage || errorMessage;
         testResults.push({
           testCase: i + 1,
           status: 'Error',
           passed: false,
           executionTime: 0,
           memoryUsed: 0,
-          error: e.response?.data?.message || e.message,
+          error: errorMessage,
         });
       }
     }
@@ -213,7 +221,7 @@ router.post('/', auth, async (req, res) => {
     const message = allPassed
       ? 'Accepted'
       : judgeServiceUnavailable
-      ? 'Judge service unavailable'
+      ? (executionErrorMessage || 'Judge service unavailable')
       : 'Wrong Answer';
     const status = allPassed ? 'Accepted' : 'Wrong Answer';
     const score = allPassed ? 100 : Math.round((testResults.filter(t => t.passed).length / testResults.length) * 100);
