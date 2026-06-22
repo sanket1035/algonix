@@ -8,28 +8,36 @@ const { auth } = require('../middleware/auth');
 
 const router = express.Router();
 
-const LANGUAGE_IDS = {
-  javascript: 63,
-  python: 71,
-  java: 62,
-  cpp: 54,
+const LANGUAGE_MAP = {
+  javascript: { name: 'javascript', extension: 'js' },
+  python: { name: 'python', extension: 'py' },
+  java: { name: 'java', extension: 'java' },
+  cpp: { name: 'cpp', extension: 'cpp' },
 };
 
-async function runOnJudge0(code, languageId, input) {
-  const url = `${process.env.JUDGE0_URL}/submissions?base64_encoded=false&wait=true`;
-  const { data } = await axios.post(url, {
-    source_code: code,
-    language_id: languageId,
-    stdin: input,
+const PISTON_EXECUTE_URL = process.env.PISTON_URL || 'https://emkc.org/api/v2/piston/execute';
+
+async function runPiston(code, language, input) {
+  const runtime = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
+
+  const { data } = await axios.post(PISTON_EXECUTE_URL, {
+    language: runtime.name,
+    files: [{ name: `Main.${runtime.extension}`, content: code }],
+    stdin: input || '',
   }, {
-    headers: {
-      'X-RapidAPI-Key': process.env.RAPIDAPI_KEY,
-      'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
-      'Content-Type': 'application/json',
-    },
-    timeout: 15000,
+    timeout: 20000,
   });
-  return data;
+
+  if (!data || !data.run) {
+    throw new Error('Unexpected Piston response');
+  }
+
+  return {
+    stdout: data.run.stdout,
+    stderr: data.run.stderr,
+    code: data.run.code,
+    output: data.run.output,
+  };
 }
 
 function normalizeOutput(str) {
@@ -84,10 +92,18 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ message: 'Code cannot be empty' });
     }
 
+    if (code.length > 10000) {
+      return res.status(400).json({ message: 'Code is too long. Maximum 10KB allowed.' });
+    }
+
+    if (!['javascript', 'python', 'java', 'cpp'].includes(language)) {
+      return res.status(400).json({ message: 'Unsupported language' });
+    }
+
     const challenge = await Challenge.findById(challengeId);
     if (!challenge) return res.status(404).json({ message: 'Challenge not found' });
 
-    const user = await User.findById(req.user._id);
+    const user = req.user;
     const isUnlocked = user.unlockedChallenges.includes(challenge._id) ||
                       challenge.fastTrackUnlock ||
                       challenge.difficulty === 'Beginner' ||
@@ -99,55 +115,54 @@ router.post('/', auth, async (req, res) => {
       return res.status(403).json({ message: 'Challenge not unlocked' });
     }
 
-    const languageId = LANGUAGE_IDS[language] || 63;
     const visibleTestCases = challenge.testCases.filter(tc => !tc.isHidden);
     const testCasesToRun = visibleTestCases.length > 0 ? visibleTestCases : challenge.testCases;
 
     let testResults = [];
     let allPassed = true;
+    let judgeServiceUnavailable = false;
 
-    // Try Judge0, fall back to basic check if API key missing
-    if (process.env.RAPIDAPI_KEY && process.env.RAPIDAPI_KEY !== 'your_rapidapi_key_here') {
-      for (let i = 0; i < testCasesToRun.length; i++) {
-        const tc = testCasesToRun[i];
-        try {
-          const result = await runOnJudge0(code, languageId, tc.input || '');
-          const actual = normalizeOutput(result.stdout);
-          const expected = normalizeOutput(tc.expectedOutput);
-          const passed = result.status?.id === 3 && compareOutputs(actual, expected);
-          if (!passed) allPassed = false;
+    for (let i = 0; i < testCasesToRun.length; i++) {
+      const tc = testCasesToRun[i];
+      try {
+        const result = await runPiston(code, language, tc.input || '');
+        const actual = normalizeOutput(result.stdout || result.output);
+        const expected = normalizeOutput(tc.expectedOutput);
+        const passed = (result.code === 0 || result.code === undefined) && compareOutputs(actual, expected);
+        if (!passed) allPassed = false;
 
-          testResults.push({
-            testCase: i + 1,
-            status: passed ? 'Accepted' : (result.status?.description || 'Wrong Answer'),
-            executionTime: parseFloat(result.time) || 0,
-            memoryUsed: result.memory || 0,
-            passed,
-            actual,
-            expected,
-            error: result.stderr || result.compile_output || undefined,
-          });
-        } catch (e) {
-          allPassed = false;
-          testResults.push({ testCase: i + 1, status: 'Error', passed: false, error: e.message });
-        }
+        testResults.push({
+          testCase: i + 1,
+          status: passed ? 'Accepted' : (result.stderr ? 'Runtime Error' : 'Wrong Answer'),
+          executionTime: 0,
+          memoryUsed: 0,
+          passed,
+          actual,
+          expected,
+          error: result.stderr || undefined,
+        });
+      } catch (e) {
+        console.error('Piston request failed for submission:', {
+          challengeId,
+          language,
+          testCase: i + 1,
+          error: e.message,
+          stack: e.stack,
+          responseData: e.response?.data,
+          responseStatus: e.response?.status,
+        });
+        allPassed = false;
+        judgeServiceUnavailable = true;
+        testResults.push({
+          testCase: i + 1,
+          status: 'Error',
+          passed: false,
+          executionTime: 0,
+          memoryUsed: 0,
+          error: e.response?.data?.message || e.message,
+        });
       }
-    } else {
-      // No Judge0 key — do not mark code as correct without actual execution
-      const reason = 'Judge service unavailable';
-      console.warn('Judge0 API key missing: unable to verify submission.');
-      allPassed = false;
-      testResults = testCasesToRun.map((_, i) => ({
-        testCase: i + 1,
-        status: 'Wrong Answer',
-        passed: false,
-        executionTime: 0,
-        memoryUsed: 0,
-        error: reason,
-      }));
     }
-
-    const judgeServiceUnavailable = !(process.env.RAPIDAPI_KEY && process.env.RAPIDAPI_KEY !== 'your_rapidapi_key_here');
     const correct = allPassed && !judgeServiceUnavailable;
     const message = allPassed
       ? 'Accepted'

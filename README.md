@@ -19,7 +19,7 @@ A gamified coding skill development platform. Practice algorithms, earn badges, 
 |---|---|
 | Frontend | React 18, TypeScript, Material-UI, TanStack Query, Monaco Editor |
 | Backend | Node.js, Express.js, MongoDB/Mongoose, JWT |
-| Code Execution | Judge0 API (RapidAPI) |
+| Code Execution | Piston API |
 | DevOps | Docker, Docker Compose, Nginx |
 
 ## Quick Start
@@ -28,7 +28,7 @@ A gamified coding skill development platform. Practice algorithms, earn badges, 
 
 - Node.js 18+
 - Docker & Docker Compose
-- [Judge0 API key](https://rapidapi.com/judge0-official/api/judge0-ce/) from RapidAPI
+- No external code execution API key required for default Piston usage; you can set `PISTON_URL` to a self-hosted Piston or alternate execution endpoint if public access is restricted
 
 ### With Docker (Recommended)
 
@@ -38,7 +38,7 @@ cd algonix
 
 # Configure environment
 cp backend/.env.example backend/.env
-# Edit backend/.env — set JWT_SECRET, RAPIDAPI_KEY, FRONTEND_URL
+# Edit backend/.env — set JWT_SECRET, FRONTEND_URL, and optionally PISTON_URL if you host a private execution service
 
 docker-compose up -d
 ```
@@ -70,10 +70,15 @@ Create `backend/.env` from `backend/.env.example`:
 PORT=5000
 MONGODB_URI=mongodb://localhost:27017/algonix
 JWT_SECRET=<your_strong_secret>
-JUDGE0_URL=https://judge0-ce.p.rapidapi.com
-RAPIDAPI_KEY=<your_rapidapi_key>
+PISTON_URL=https://emkc.org/api/v2/piston/execute
 NODE_ENV=development
 FRONTEND_URL=http://localhost:3000
+```
+
+If the public Piston service is restricted for your deployment, set `PISTON_URL` to your own hosted Piston instance, for example:
+
+```env
+PISTON_URL=http://localhost:8080/api/v2/piston/execute
 ```
 
 > **Never commit `.env` to version control.** It is listed in `.gitignore`.

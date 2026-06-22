@@ -41,26 +41,11 @@ The script will:
    PORT=5000
    MONGODB_URI=mongodb://admin:password123@mongodb:27017/algonix?authSource=admin
    JWT_SECRET=your_super_secret_jwt_key_change_in_production
-   JUDGE0_URL=https://judge0-ce.p.rapidapi.com
-   RAPIDAPI_KEY=your_rapidapi_key_here
+   PISTON_URL=https://emkc.org/api/v2/piston/execute
    NODE_ENV=production
    ```
 
-### Step 2: Judge0 API Setup
-
-1. **Sign up for RapidAPI**
-   - Go to [RapidAPI](https://rapidapi.com/)
-   - Create a free account
-
-2. **Subscribe to Judge0 CE**
-   - Search for "Judge0 CE"
-   - Subscribe to the free tier (1000 requests/month)
-   - Copy your API key
-
-3. **Update environment**
-   ```env
-   RAPIDAPI_KEY=your_actual_rapidapi_key_here
-   ```
+> The backend uses Piston for code execution. If public access is restricted, set `PISTON_URL` to your self-hosted Piston endpoint.
 
 ### Step 3: Start Services
 
@@ -340,11 +325,11 @@ docker-compose logs -f
    # Verify connection string in .env
    ```
 
-3. **Judge0 API errors**
+3. **Code execution errors**
    ```bash
-   # Verify API key in .env
-   # Check RapidAPI subscription status
-   # Test API endpoint manually
+   # Check backend logs for remote execution failures
+   # Verify submitted code is properly formatted and uses a supported language
+   # Retry later if the Piston service is temporarily unavailable
    ```
 
 4. **Frontend build errors**
