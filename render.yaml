@@ -14,8 +14,10 @@ services:
       - key: JWT_SECRET
         generateValue: true
         sync: false
+      - key: GLOT_API_TOKEN
+        sync: false
       - key: PISTON_URL
         sync: false
-      # Piston is used for execution, so no Judge0/RapidAPI env vars are required
+      # Use Glot API for execution when possible. Piston is now whitelist-only.
       - key: FRONTEND_URL
         sync: false

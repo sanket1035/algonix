@@ -41,11 +41,13 @@ The script will:
    PORT=5000
    MONGODB_URI=mongodb://admin:password123@mongodb:27017/algonix?authSource=admin
    JWT_SECRET=your_super_secret_jwt_key_change_in_production
+   GLOT_API_TOKEN=your_glot_api_token_here
+   GLOT_API_URL=https://glot.io/api/run
    PISTON_URL=https://emkc.org/api/v2/piston/execute
    NODE_ENV=production
    ```
 
-> The backend uses Piston for code execution. If public access is restricted, set `PISTON_URL` to your self-hosted Piston endpoint.
+> The backend uses Glot / Piston for code execution. Set `GLOT_API_TOKEN` for Glot. If you prefer self-hosting, set `PISTON_URL` to your own Piston endpoint.
 
 ### Step 3: Start Services
 

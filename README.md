@@ -19,7 +19,7 @@ A gamified coding skill development platform. Practice algorithms, earn badges, 
 |---|---|
 | Frontend | React 18, TypeScript, Material-UI, TanStack Query, Monaco Editor |
 | Backend | Node.js, Express.js, MongoDB/Mongoose, JWT |
-| Code Execution | Piston API |
+| Code Execution | Glot API / Piston API |
 | DevOps | Docker, Docker Compose, Nginx |
 
 ## Quick Start
@@ -28,7 +28,7 @@ A gamified coding skill development platform. Practice algorithms, earn badges, 
 
 - Node.js 18+
 - Docker & Docker Compose
-- No external code execution API key required for default Piston usage; you can set `PISTON_URL` to a self-hosted Piston or alternate execution endpoint if public access is restricted
+- No external code execution API key required for default Piston usage, but public Piston is now whitelist-only. Use `GLOT_API_TOKEN` for Glot or set `PISTON_URL` to a self-hosted Piston endpoint.
 
 ### With Docker (Recommended)
 
@@ -38,7 +38,7 @@ cd algonix
 
 # Configure environment
 cp backend/.env.example backend/.env
-# Edit backend/.env — set JWT_SECRET, FRONTEND_URL, and optionally PISTON_URL if you host a private execution service
+# Edit backend/.env — set JWT_SECRET, FRONTEND_URL, and either `GLOT_API_TOKEN` for Glot or `PISTON_URL` for your own Piston host
 
 docker-compose up -d
 ```

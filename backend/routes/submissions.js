@@ -22,7 +22,38 @@ const LANGUAGE_VERSIONS = {
   cpp: '10.2.0',
 };
 
+const GLOT_API_URL = process.env.GLOT_API_URL || 'https://glot.io/api/run';
+const GLOT_API_TOKEN = process.env.GLOT_API_TOKEN;
 const PISTON_EXECUTE_URL = process.env.PISTON_URL || 'https://emkc.org/api/v2/piston/execute';
+
+async function runGlot(code, language, input) {
+  const runtime = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
+  if (!GLOT_API_TOKEN) {
+    throw new Error('GLOT_API_TOKEN is not configured');
+  }
+
+  const { data } = await axios.post(`${GLOT_API_URL}/${runtime.name}/latest`, {
+    files: [{ name: `main.${runtime.extension}`, content: code }],
+    stdin: input || '',
+  }, {
+    timeout: 20000,
+    headers: {
+      Authorization: `Token ${GLOT_API_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!data) {
+    throw new Error('Unexpected Glot response');
+  }
+
+  return {
+    stdout: data.stdout || '',
+    stderr: data.stderr || data.error || '',
+    code: typeof data.exitCode === 'number' ? data.exitCode : (data.error ? 1 : 0),
+    output: data.stdout || '',
+  };
+}
 
 async function runPiston(code, language, input) {
   const runtime = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
@@ -46,6 +77,13 @@ async function runPiston(code, language, input) {
     code: data.run.code,
     output: data.run.output,
   };
+}
+
+async function runCodeExecution(code, language, input) {
+  if (GLOT_API_TOKEN) {
+    return runGlot(code, language, input);
+  }
+  return runPiston(code, language, input);
 }
 
 function normalizeOutput(str) {
@@ -133,7 +171,7 @@ router.post('/', auth, async (req, res) => {
     for (let i = 0; i < testCasesToRun.length; i++) {
       const tc = testCasesToRun[i];
       try {
-        const result = await runPiston(code, language, tc.input || '');
+        const result = await runCodeExecution(code, language, tc.input || '');
         const actual = normalizeOutput(result.stdout || result.output);
         const expected = normalizeOutput(tc.expectedOutput || tc.output);
         const passed = (result.code === 0 || result.code === undefined) && compareOutputs(actual, expected);
@@ -150,7 +188,7 @@ router.post('/', auth, async (req, res) => {
           error: result.stderr || undefined,
         });
       } catch (e) {
-        console.error('Piston request failed for submission:', {
+        console.error('Code execution request failed for submission:', {
           challengeId,
           language,
           testCase: i + 1,
