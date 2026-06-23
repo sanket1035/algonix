@@ -5,7 +5,7 @@ import App from './App';
 
 // Suppress Monaco Editor ResizeObserver loop errors in webpack dev server
 window.addEventListener('error', e => {
-  if (e.message === 'ResizeObserver loop completed with undelivered notifications' || e.message === 'ResizeObserver loop limit exceeded') {
+  if (e.message && (e.message.includes('ResizeObserver') || e.message.includes('Resize observer'))) {
     e.stopImmediatePropagation();
   }
 });
