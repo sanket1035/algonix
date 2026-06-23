@@ -45,6 +45,49 @@ async function executeCode(code, language, input = '') {
   return await executeLocal(code, language, input);
 }
 
+function wrapCode(code, language, challengeTitle) {
+  const targets = ["Two Sum", "Reverse String", "Palindrome Number", "Valid Parentheses"];
+  if (!targets.includes(challengeTitle)) {
+    return code;
+  }
+
+  if (language === 'python') {
+    if (code.includes('sys.stdin') || code.includes('input(')) {
+      return code;
+    }
+    return `from typing import List, Dict, Tuple, Optional, Set, Union\n\n${code}\n\n# --- Auto-generated Algonix Driver ---\nimport sys\nimport json\n\ndef run_algonix_solution():\n    target_func = None\n    for name in ['two_sum', 'twoSum', 'reverse_string', 'reverseString', 'is_palindrome', 'isPalindrome', 'is_valid', 'isValid']:\n        if name in globals():\n            target_func = globals()[name]\n            break\n    if not target_func and 'Solution' in globals():\n        sol_inst = globals()['Solution']()\n        for name in ['twoSum', 'two_sum', 'reverseString', 'reverse_string', 'isPalindrome', 'is_palindrome', 'isValid', 'is_valid']:\n            if hasattr(sol_inst, name):\n                target_func = getattr(sol_inst, name)\n                break\n    if not target_func:\n        return\n    lines = sys.stdin.read().splitlines()\n    if not lines:\n        return\n    challenge_title = "${challengeTitle}"\n    if challenge_title == "Two Sum":\n        nums = json.loads(lines[0])\n        target = int(lines[1])\n        res = target_func(nums, target)\n        print(json.dumps(res).replace(" ", ""))\n    elif challenge_title == "Reverse String":\n        s = json.loads(lines[0])\n        res = target_func(s)\n        if res is not None:\n            print(json.dumps(res).replace(" ", ""))\n        else:\n            print(json.dumps(s).replace(" ", ""))\n    elif challenge_title == "Palindrome Number":\n        x = int(lines[0])\n        res = target_func(x)\n        print(str(res).lower())\n    elif challenge_title == "Valid Parentheses":\n        s = lines[0].strip('"').strip("'")\n        res = target_func(s)\n        print(str(res).lower())\n\nif __name__ == '__main__':\n    run_algonix_solution()\n`;
+  }
+
+  if (language === 'javascript') {
+    if (code.includes('fs.readFileSync') || code.includes('process.stdin')) {
+      return code;
+    }
+    return `${code}\n\n// --- Auto-generated Algonix Driver ---\nconst fs = require('fs');\ntry {\n  let targetFunc = null;\n  const funcs = ['twoSum', 'two_sum', 'reverseString', 'reverse_string', 'isPalindrome', 'is_palindrome', 'isValid', 'is_valid'];\n  for (const f of funcs) {\n    if (typeof global[f] === 'function') {\n      targetFunc = global[f];\n      break;\n    }\n    if (typeof eval(\`typeof \${f}\`) !== 'undefined') {\n      targetFunc = eval(f);\n      break;\n    }\n  }\n  if (targetFunc) {\n    const inputData = fs.readFileSync(0, 'utf-8').trim().split('\\n').map(line => line.trim());\n    if (inputData.length > 0 && inputData[0] !== '') {\n      const challengeTitle = "${challengeTitle}";\n      if (challengeTitle === "Two Sum") {\n        const nums = JSON.parse(inputData[0]);\n        const target = parseInt(inputData[1]);\n        const res = targetFunc(nums, target);\n        console.log(JSON.stringify(res));\n      } else if (challengeTitle === "Reverse String") {\n        const s = JSON.parse(inputData[0]);\n        const res = targetFunc(s);\n        if (res !== undefined) {\n          console.log(JSON.stringify(res));\n        } else {\n          console.log(JSON.stringify(s));\n        }\n      } else if (challengeTitle === "Palindrome Number") {\n        const x = parseInt(inputData[0]);\n        const res = targetFunc(x);\n        console.log(res.toString());\n      } else if (challengeTitle === "Valid Parentheses") {\n        let s = inputData[0];\n        if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {\n          s = s.slice(1, -1);\n        }\n        const res = targetFunc(s);\n        console.log(res.toString());\n      }\n    }\n  }\n} catch (e) {}\n`;
+  }
+
+  if (language === 'cpp') {
+    if (code.includes('int main(')) {
+      return code;
+    }
+    const isSolutionClass = code.includes('class Solution');
+    const header = isSolutionClass ? '#define SOLUTION_CLASS 1\n' : '';
+    return `${header}${code}\n\n// --- Auto-generated Algonix Driver ---\n#include <iostream>\n#include <vector>\n#include <string>\n#include <sstream>\n#include <algorithm>\n\nusing namespace std;\n\nint main() {\n    string line1, line2;\n    if (!getline(cin, line1)) return 0;\n    string challengeTitle = "${challengeTitle}";\n    if (challengeTitle == "Two Sum") {\n        if (!getline(cin, line2)) return 0;\n        vector<int> nums;\n        string clean = "";\n        for (char c : line1) {\n            if (isdigit(c) || c == '-' || c == ',') clean += c;\n        }\n        stringstream ss(clean);\n        string item;\n        while (getline(ss, item, ',')) {\n            if (!item.empty()) nums.push_back(stoi(item));\n        }\n        int target = stoi(line2);\n        #ifdef SOLUTION_CLASS\n        Solution sol;\n        vector<int> res = sol.twoSum(nums, target);\n        #else\n        vector<int> res = twoSum(nums, target);\n        #endif\n        cout << "[" << res[0] << "," << res[1] << "]" << endl;\n    }\n    else if (challengeTitle == "Reverse String") {\n        vector<char> s;\n        for (char c : line1) {\n            if (c != '[' && c != ']' && c != ',' && c != '"' && c != '\\'') {\n                s.push_back(c);\n            }\n        }\n        #ifdef SOLUTION_CLASS\n        Solution sol;\n        sol.reverseString(s);\n        #else\n        reverseString(s);\n        #endif\n        cout << "[";\n        for (size_t i = 0; i < s.size(); ++i) {\n            cout << "\\"" << s[i] << "\\"";\n            if (i < s.size() - 1) cout << ",";\n        }\n        cout << "]" << endl;\n    }\n    else if (challengeTitle == "Palindrome Number") {\n        int x = stoi(line1);\n        #ifdef SOLUTION_CLASS\n        Solution sol;\n        bool res = sol.isPalindrome(x);\n        #else\n        bool res = isPalindrome(x);\n        #endif\n        cout << (res ? "true" : "false") << endl;\n    }\n    else if (challengeTitle == "Valid Parentheses") {\n        string s = "";\n        for (char c : line1) {\n            if (c != '"' && c != '\\'') s += c;\n        }\n        #ifdef SOLUTION_CLASS\n        Solution sol;\n        bool res = sol.isValid(s);\n        #else\n        bool res = isValid(s);\n        #endif\n        cout << (res ? "true" : "false") << endl;\n    }\n    return 0;\n}\n`;
+  }
+
+  if (language === 'java') {
+    if (code.includes('public static void main(')) {
+      return code;
+    }
+    let wrappedCode = code;
+    if (!code.includes('class Solution')) {
+      wrappedCode = `class Solution {\n${code}\n}`;
+    }
+    return `${wrappedCode}\n\n// --- Auto-generated Algonix Driver ---\nimport java.io.BufferedReader;\nimport java.io.InputStreamReader;\nimport java.util.*;\n\nclass Main {\n    public static void main(String[] args) throws Exception {\n        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n        String line1 = br.readLine();\n        if (line1 == null) return;\n        String challengeTitle = "${challengeTitle}";\n        Solution sol = new Solution();\n        if (challengeTitle.equals("Two Sum")) {\n            String line2 = br.readLine();\n            if (line2 == null) return;\n            String clean = line1.replaceAll("[\\\\[\\\\]\\\\s]", "");\n            String[] parts = clean.split(",");\n            int[] nums = new int[parts.length];\n            for (int i = 0; i < parts.length; i++) {\n                nums[i] = Integer.parseInt(parts[i]);\n            }\n            int target = Integer.parseInt(line2.trim());\n            int[] res = sol.twoSum(nums, target);\n            System.out.println("[" + res[0] + "," + res[1] + "]");\n        } else if (challengeTitle.equals("Reverse String")) {\n            String clean = line1.replaceAll("[\\\\[\\\\]\\\\\\"\\\\'\\\\s]", "");\n            char[] s = new char[clean.length()];\n            for (int i = 0; i < clean.length(); i++) {\n                s[i] = clean.charAt(i);\n            }\n            sol.reverseString(s);\n            StringBuilder sb = new StringBuilder();\n            sb.append("[");\n            for (int i = 0; i < s.length; i++) {\n                sb.append("\\"").append(s[i]).append("\\"");\n                if (i < s.length - 1) sb.append(",");\n            }\n            sb.append("]");\n            System.out.println(sb.toString());\n        } else if (challengeTitle.equals("Palindrome Number")) {\n            int x = Integer.parseInt(line1.trim());\n            boolean res = sol.isPalindrome(x);\n            System.out.println(res);\n        } else if (challengeTitle.equals("Valid Parentheses")) {\n            String s = line1.replaceAll("[\\"']", "").trim();\n            boolean res = sol.isValid(s);\n            System.out.println(res);\n        }\n    }\n}\n`;
+  }
+
+  return code;
+}
+
 router.post('/', auth, async (req, res) => {
   try {
     const { challengeId, code, language } = req.body;
@@ -94,10 +137,12 @@ router.post('/', auth, async (req, res) => {
     let judgeServiceUnavailable = false;
     let executionErrorMessage = null;
 
+    const wrappedUserCode = wrapCode(code, language, challenge.title);
+
     for (let i = 0; i < testCasesToRun.length; i++) {
       const tc = testCasesToRun[i];
       try {
-        const result = await executeCode(code, language, tc.input || '');
+        const result = await executeCode(wrappedUserCode, language, tc.input || '');
         const stdout = result.stdout || '';
         const stderr = result.stderr || '';
 
