@@ -9,36 +9,40 @@ const { auth } = require('../middleware/auth');
 const router = express.Router();
 
 const LANGUAGE_MAP = {
-  javascript: { name: 'javascript', extension: 'js' },
-  python: { name: 'python', extension: 'py' },
-  java: { name: 'java', extension: 'java' },
-  cpp: { name: 'cpp', extension: 'cpp' },
+  javascript: 63,
+  python: 71,
+  java: 62,
+  cpp: 54,
 };
 
-async function runGlot(code, language) {
-  const runtime = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
-  const token = process.env.GLOT_TOKEN || process.env.GLOT_API_TOKEN;
-  if (!token) {
-    throw new Error('GLOT_TOKEN is not configured');
-  }
+const JUDGE0_URL = process.env.JUDGE0_URL || 'http://localhost:2358';
 
-  const { data } = await axios.post(`https://run.glot.io/languages/${runtime.name}/latest`, {
-    files: [{ name: `main.${runtime.extension}`, content: code }]
+async function runJudge0(code, language, input) {
+  const languageId = LANGUAGE_MAP[language] || 63;
+  const base64Code = Buffer.from(code).toString('base64');
+  const base64Input = Buffer.from(input || '').toString('base64');
+
+  const url = `${JUDGE0_URL}/submissions?base64_encoded=true&wait=true`;
+  const { data } = await axios.post(url, {
+    source_code: base64Code,
+    language_id: languageId,
+    stdin: base64Input,
   }, {
-    timeout: 20000,
-    headers: {
-      Authorization: `Token ${token}`,
-      'Content-Type': 'application/json',
-    },
+    timeout: 25000,
   });
 
   if (!data) {
-    throw new Error('Unexpected Glot response');
+    throw new Error('Unexpected Judge0 response');
   }
 
+  const stdout = data.stdout ? Buffer.from(data.stdout, 'base64').toString('utf-8') : '';
+  const stderr = data.stderr ? Buffer.from(data.stderr, 'base64').toString('utf-8') : '';
+  const compile_output = data.compile_output ? Buffer.from(data.compile_output, 'base64').toString('utf-8') : '';
+
   return {
-    stdout: data.stdout || '',
-    stderr: data.stderr || data.error || '',
+    stdout: stdout || '',
+    stderr: stderr || compile_output || data.message || '',
+    status: data.status,
   };
 }
 
@@ -94,9 +98,11 @@ router.post('/', auth, async (req, res) => {
     for (let i = 0; i < testCasesToRun.length; i++) {
       const tc = testCasesToRun[i];
       try {
-        const result = await runGlot(code, language);
+        const result = await runJudge0(code, language, tc.input || '');
         const stdout = result.stdout || '';
         const stderr = result.stderr || '';
+        const statusId = result.status?.id;
+        const statusDescription = result.status?.description || '';
 
         const actual = stdout.trim();
         const expected = (tc.output || '').trim();
@@ -105,7 +111,16 @@ router.post('/', auth, async (req, res) => {
         let passed = false;
         let error = stderr.trim() || undefined;
 
-        if (stderr.trim() !== '') {
+        if (statusId === 6) {
+          status = 'Compilation Error';
+          error = stderr.trim() || 'Compilation Error';
+        } else if (statusId === 5) {
+          status = 'Time Limit Exceeded';
+          error = 'Time Limit Exceeded';
+        } else if (statusId >= 7 && statusId <= 12) {
+          status = 'Runtime Error';
+          error = stderr.trim() || statusDescription;
+        } else if (stderr.trim() !== '') {
           status = 'Runtime Error';
         } else if (stdout.trim() === '') {
           status = 'Wrong Answer';

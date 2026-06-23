@@ -14,10 +14,8 @@ services:
       - key: JWT_SECRET
         generateValue: true
         sync: false
-      - key: GLOT_API_TOKEN
+      - key: JUDGE0_URL
         sync: false
-      - key: PISTON_URL
-        sync: false
-      # Use Glot API for execution when possible. Piston is now whitelist-only.
+      # Use self-hosted Judge0 CE for isolated code execution.
       - key: FRONTEND_URL
         sync: false
