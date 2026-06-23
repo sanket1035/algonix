@@ -9,40 +9,32 @@ const { auth } = require('../middleware/auth');
 const router = express.Router();
 
 const LANGUAGE_MAP = {
-  javascript: 63,
-  python: 71,
-  java: 62,
-  cpp: 54,
+  javascript: { name: 'javascript', extension: 'js' },
+  python: { name: 'python', extension: 'py' },
+  java: { name: 'java', extension: 'java' },
+  cpp: { name: 'cpp', extension: 'cpp' },
 };
 
-const JUDGE0_URL = process.env.JUDGE0_URL || 'http://localhost:2358';
+const PISTON_URL = process.env.PISTON_URL || 'http://localhost:2000/api/v2/execute';
 
-async function runJudge0(code, language, input) {
-  const languageId = LANGUAGE_MAP[language] || 63;
-  const base64Code = Buffer.from(code).toString('base64');
-  const base64Input = Buffer.from(input || '').toString('base64');
-
-  const url = `${JUDGE0_URL}/submissions?base64_encoded=true&wait=true`;
-  const { data } = await axios.post(url, {
-    source_code: base64Code,
-    language_id: languageId,
-    stdin: base64Input,
+async function runPiston(code, language, input) {
+  const runtime = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
+  const { data } = await axios.post(PISTON_URL, {
+    language: runtime.name,
+    version: '*',
+    files: [{ name: `main.${runtime.extension}`, content: code }],
+    stdin: input || '',
   }, {
-    timeout: 25000,
+    timeout: 20000,
   });
 
-  if (!data) {
-    throw new Error('Unexpected Judge0 response');
+  if (!data || !data.run) {
+    throw new Error('Unexpected Piston response');
   }
 
-  const stdout = data.stdout ? Buffer.from(data.stdout, 'base64').toString('utf-8') : '';
-  const stderr = data.stderr ? Buffer.from(data.stderr, 'base64').toString('utf-8') : '';
-  const compile_output = data.compile_output ? Buffer.from(data.compile_output, 'base64').toString('utf-8') : '';
-
   return {
-    stdout: stdout || '',
-    stderr: stderr || compile_output || data.message || '',
-    status: data.status,
+    stdout: data.run.stdout || '',
+    stderr: data.run.stderr || '',
   };
 }
 
@@ -98,11 +90,9 @@ router.post('/', auth, async (req, res) => {
     for (let i = 0; i < testCasesToRun.length; i++) {
       const tc = testCasesToRun[i];
       try {
-        const result = await runJudge0(code, language, tc.input || '');
+        const result = await runPiston(code, language, tc.input || '');
         const stdout = result.stdout || '';
         const stderr = result.stderr || '';
-        const statusId = result.status?.id;
-        const statusDescription = result.status?.description || '';
 
         const actual = stdout.trim();
         const expected = (tc.output || '').trim();
@@ -111,16 +101,7 @@ router.post('/', auth, async (req, res) => {
         let passed = false;
         let error = stderr.trim() || undefined;
 
-        if (statusId === 6) {
-          status = 'Compilation Error';
-          error = stderr.trim() || 'Compilation Error';
-        } else if (statusId === 5) {
-          status = 'Time Limit Exceeded';
-          error = 'Time Limit Exceeded';
-        } else if (statusId >= 7 && statusId <= 12) {
-          status = 'Runtime Error';
-          error = stderr.trim() || statusDescription;
-        } else if (stderr.trim() !== '') {
+        if (stderr.trim() !== '') {
           status = 'Runtime Error';
         } else if (stdout.trim() === '') {
           status = 'Wrong Answer';

@@ -14,8 +14,8 @@ services:
       - key: JWT_SECRET
         generateValue: true
         sync: false
-      - key: JUDGE0_URL
+      - key: PISTON_URL
         sync: false
-      # Use self-hosted Judge0 CE for isolated code execution.
+      # Use self-hosted Piston CE for isolated code execution.
       - key: FRONTEND_URL
         sync: false
