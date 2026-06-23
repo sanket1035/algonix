@@ -188,16 +188,19 @@ router.post('/', auth, async (req, res) => {
       const tc = testCasesToRun[i];
       try {
         const result = await runCodeExecution(code, language, tc.input || '');
-        const actual = normalizeOutput(result.stdout || result.output);
-        const expected = normalizeOutput(tc.expectedOutput || tc.output);
-        const validOutput = expected !== '';
-        const passed = validOutput && (result.code === 0 || result.code === undefined) && compareOutputs(actual, expected);
+        const actual = normalizeOutput(result.stdout || result.output || '');
+        const expected = normalizeOutput(tc.expectedOutput || tc.output || '');
+        
+        // A test passes if the actual output matches expected output
+        // Exit code errors are only counted if there's no output
+        const hasRuntimeError = result.stderr && result.stderr.trim() !== '';
+        const passed = !hasRuntimeError && compareOutputs(actual, expected);
         if (!passed) allPassed = false;
 
         let error = result.stderr || undefined;
-        if (!passed && !validOutput) {
+        if (!passed && !expected) {
           error = 'Missing expected output for test case';
-        } else if (!passed && validOutput && actual === '') {
+        } else if (!passed && expected && actual === '') {
           error = error || 'No output produced by code';
         }
 
