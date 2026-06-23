@@ -15,15 +15,39 @@ const LANGUAGE_MAP = {
   cpp: { name: 'cpp', extension: 'cpp' },
 };
 
-const PISTON_URL = process.env.PISTON_URL || 'http://localhost:2000/api/v2/execute';
+async function executeCode(code, language) {
+  const token = process.env.GLOT_TOKEN || process.env.GLOT_API_TOKEN;
 
-async function runPiston(code, language, input) {
+  // 1. If GLOT_TOKEN is configured (Production/Render), use Glot API
+  if (token) {
+    const runtime = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
+    const { data } = await axios.post(`https://run.glot.io/languages/${runtime.name}/latest`, {
+      files: [{ name: `main.${runtime.extension}`, content: code }]
+    }, {
+      timeout: 20000,
+      headers: {
+        Authorization: `Token ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!data) {
+      throw new Error('Unexpected Glot response');
+    }
+
+    return {
+      stdout: data.stdout || '',
+      stderr: data.stderr || data.error || '',
+    };
+  }
+
+  // 2. If no GLOT_TOKEN is set (Local Development), fall back to local Piston container
+  const PISTON_URL = process.env.PISTON_URL || 'http://localhost:2000/api/v2/execute';
   const runtime = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
   const { data } = await axios.post(PISTON_URL, {
     language: runtime.name,
     version: '*',
     files: [{ name: `main.${runtime.extension}`, content: code }],
-    stdin: input || '',
   }, {
     timeout: 20000,
   });
@@ -90,7 +114,7 @@ router.post('/', auth, async (req, res) => {
     for (let i = 0; i < testCasesToRun.length; i++) {
       const tc = testCasesToRun[i];
       try {
-        const result = await runPiston(code, language, tc.input || '');
+        const result = await executeCode(code, language);
         const stdout = result.stdout || '';
         const stderr = result.stderr || '';
 
