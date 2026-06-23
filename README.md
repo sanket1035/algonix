@@ -9,6 +9,7 @@ A gamified coding skill development platform. Practice algorithms, earn badges, 
 - **Coding Challenges** — Multi-difficulty (Beginner → Expert) with progressive unlocking
 - **Skill Tests** — MCQ-based fast-track unlocking by difficulty level
 - **Code Editor** — Monaco Editor with multi-language support (JS, Python, Java, C++)
+- **LeetCode-Style Submissions** — Write standard class or function-based solutions (`class Solution`, `def two_sum`, etc.). The platform automatically wraps and executes them with input-injecting test runners.
 - **Gamification** — Points, levels, badges, streaks, and certificates
 - **Leaderboards** — Weekly and all-time rankings
 - **Admin Panel** — Manage challenges, users, and platform stats
@@ -19,48 +20,44 @@ A gamified coding skill development platform. Practice algorithms, earn badges, 
 |---|---|
 | Frontend | React 18, TypeScript, Material-UI, TanStack Query, Monaco Editor |
 | Backend | Node.js, Express.js, MongoDB/Mongoose, JWT |
-| Code Execution | Glot API / Piston API |
+| Code Execution | **Container-Native Execution** (Node, Python 3, G++, JDK 17) |
 | DevOps | Docker, Docker Compose, Nginx |
+
+## Code Execution Architecture
+
+Algonix uses **Container-Native Execution** to compile and run student submissions:
+- **No External Dependencies**: External whitelisted compilers (like public Piston) and DNS-blocked services (like Glot API) have been completely removed.
+- **Deployment-Isolated**: The deployment containers (on Render/Railway or local Docker) are pre-installed with `python3`, `g++`, and `openjdk17-jdk`. Submissions are executed natively and securely inside the container.
+- **Local Fallback**: During local development, the backend will automatically compile and run code using your local computer's native runtimes, requiring zero Docker configuration.
+
+---
 
 ## Quick Start
 
 ### Prerequisites
 
 - Node.js 18+
-- Docker & Docker Compose
-- No external code execution API key required for default Piston usage, but public Piston is now whitelist-only. Use `GLOT_API_TOKEN` for Glot or set `PISTON_URL` to a self-hosted Piston endpoint.
-
-### With Docker (Recommended)
-
-```bash
-git clone <repository-url>
-cd algonix
-
-# Configure environment
-cp backend/.env.example backend/.env
-# Edit backend/.env — set JWT_SECRET, FRONTEND_URL, and either `GLOT_API_TOKEN` for Glot or `PISTON_URL` for your own Piston host
-
-docker-compose up -d
-```
-
-App will be available at `http://localhost`.
+- Python 3, G++, and JDK (if testing C++/Java locally without Docker)
 
 ### Local Development
 
-```bash
-# Install all dependencies
-npm run install-all
+1. **Install all dependencies**
+   ```bash
+   npm run install-all
+   ```
 
-# Configure environment
-cp backend/.env.example backend/.env
-# Edit backend/.env with your values
+2. **Configure environment**
+   ```bash
+   cp backend/.env.example backend/.env
+   ```
+   *Edit `backend/.env` with your MongoDB connection details. No `GLOT_TOKEN` or `PISTON_URL` is required.*
 
-# Start MongoDB
-docker run -d -p 27017:27017 --name mongodb mongo:6.0
+3. **Start dev servers** (Frontend on `:3000`, Backend on `:5000`)
+   ```bash
+   npm run dev
+   ```
 
-# Start dev servers (frontend :3000, backend :5000)
-npm run dev
-```
+---
 
 ## Environment Variables
 
@@ -70,18 +67,11 @@ Create `backend/.env` from `backend/.env.example`:
 PORT=5000
 MONGODB_URI=mongodb://localhost:27017/algonix
 JWT_SECRET=<your_strong_secret>
-PISTON_URL=https://emkc.org/api/v2/piston/execute
 NODE_ENV=development
 FRONTEND_URL=http://localhost:3000
 ```
 
-If the public Piston service is restricted for your deployment, set `PISTON_URL` to your own hosted Piston instance, for example:
-
-```env
-PISTON_URL=http://localhost:8080/api/v2/piston/execute
-```
-
-> **Never commit `.env` to version control.** It is listed in `.gitignore`.
+---
 
 ## API Endpoints
 
@@ -100,32 +90,17 @@ PISTON_URL=http://localhost:8080/api/v2/piston/execute
 | GET | `/api/leaderboard/weekly` | Weekly leaderboard |
 | GET | `/api/leaderboard/all-time` | All-time leaderboard |
 
+---
+
 ## Deployment
 
 ### Cloud Platforms
 
-**Render / Railway** — Use the included `render.yaml` / `railway.json`. Set env vars in the platform dashboard.
+**Render / Railway**
+- Simply link your repository to Render or Railway.
+- The included `Dockerfile` and `render.yaml` are pre-configured to build the frontend, package the server, and install Python, C++, and Java runtimes automatically.
 
-**AWS**
-- Backend: ECS or EC2 with Docker
-- Database: MongoDB Atlas or DocumentDB
-- Frontend build served via Express static or S3 + CloudFront
-
-### Production Docker
-
-```bash
-docker-compose up -d --build
-```
-
-For HTTPS, place SSL certificates in `./ssl/` and update `nginx.conf`.
-
-## Database
-
-MongoDB collections:
-
-- `users` — profiles, stats, badges, certificates, solved/unlocked challenges
-- `challenges` — problem statements, test cases, starter code
-- `submissions` — code submissions and results
+---
 
 ## Security
 
