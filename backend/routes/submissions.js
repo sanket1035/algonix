@@ -17,7 +17,7 @@ const LANGUAGE_MAP = {
 
 async function runGlot(code, language) {
   const runtime = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
-  const token = process.env.GLOT_TOKEN;
+  const token = process.env.GLOT_TOKEN || process.env.GLOT_API_TOKEN;
   if (!token) {
     throw new Error('GLOT_TOKEN is not configured');
   }

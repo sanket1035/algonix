@@ -3,25 +3,43 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
+const { body, validationResult } = require('express-validator');
 
 const router = express.Router();
 
+const validateRegistration = [
+  body('username').trim().isLength({ min: 3 }).withMessage('Username must be at least 3 characters long'),
+  body('email').isEmail().withMessage('Email must be valid'),
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+  body('firstName').optional().trim().escape(),
+  body('lastName').optional().trim().escape(),
+];
+
+const validateLogin = [
+  body('email').isEmail().withMessage('Email must be valid'),
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+];
+
+const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  next();
+};
+
 // Register
-router.post('/register', async (req, res) => {
+router.post('/register', validateRegistration, handleValidationErrors, async (req, res) => {
   try {
     console.log('Registration attempt:', req.body);
     const { username, email, password, firstName, lastName } = req.body;
-
-    if (!username || !email || !password) {
-      return res.status(400).json({ message: 'Missing required fields' });
-    }
 
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = new User({
       username,
@@ -59,7 +77,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', validateLogin, handleValidationErrors, async (req, res) => {
   try {
     const { email, password } = req.body;
 
