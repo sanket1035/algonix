@@ -57,6 +57,36 @@ router.get('/generate/:certificateId', auth, async (req, res) => {
   }
 });
 
+// View certificate HTML
+router.get('/view/:certificateId', auth, async (req, res) => {
+  try {
+    const { certificateId } = req.params;
+    const certificate = req.user.certificates.id(certificateId);
+    
+    if (!certificate) {
+      return res.status(404).send('Certificate not found');
+    }
+
+    const html = generateCertificateHTML(req.user, certificate);
+    
+    // Add print trigger script
+    const printableHtml = html.replace('</body>', `
+      <script>
+        window.onload = function() {
+          setTimeout(function() {
+            window.print();
+          }, 300);
+        };
+      </script>
+    </body>`);
+
+    res.setHeader('Content-Type', 'text/html');
+    res.send(printableHtml);
+  } catch (error) {
+    res.status(500).send('Server error: ' + error.message);
+  }
+});
+
 // Get user certificates
 router.get('/my-certificates', auth, async (req, res) => {
   try {

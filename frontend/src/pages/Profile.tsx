@@ -55,20 +55,13 @@ const Profile: React.FC = () => {
     updateProfileMutation.mutate(profileData);
   };
 
-  const handleDownloadCertificate = async (certificateId: string, certificateName: string) => {
-    try {
-      const blob = await certificatesAPI.generateCertificate(certificateId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${certificateName.replace(/\s+/g, '_')}_Certificate.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error downloading certificate:', error);
-    }
+  const handleDownloadCertificate = (certificateId: string, certificateName: string) => {
+    const token = localStorage.getItem('token');
+    const apiBase = window.location.origin.includes('localhost:3000') 
+      ? 'http://localhost:5000' 
+      : '';
+    const url = `${apiBase}/api/certificates/view/${certificateId}?token=${token}`;
+    window.open(url, '_blank');
   };
 
   const getNextLevelProgress = () => {
