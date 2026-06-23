@@ -37,13 +37,18 @@ Algonix uses **Container-Native Execution** to compile and run student submissio
 
 ## Advanced Interview & Tech Features
 
-To stand out in technical interviews, Algonix implements advanced platform security and analysis features:
+To stand out in technical interviews, Algonix implements advanced platform security, analysis, and certification features:
 - **Performance Profiling (Feature A)**: Employs microsecond-accurate child process execution measurement (`process.hrtime.bigint()`) and custom memory baseline heuristics to calculate and return exact execution times (ms) and peak memory footprints (MB) consumed per test case.
 - **Submission Rate-Limiting (Feature B)**: Prevents server resource exhaustion or execution pool spam by throttling submissions to **1 request every 5 seconds** via Express middleware.
 - **Anti-Plagiarism Engine (Feature C)**: Validates code uniqueness by generating structural syntax fingerprints:
   - **Python AST Analyzer**: Compiles source code to an Abstract Syntax Tree (AST), stripping local identifiers, function names, and constants to map the raw logical structure.
   - **Token Regex Normalizer**: Strips comments/spaces and maps language-specific tokens (variables, keywords, declarations, types) to a generic trace across JavaScript, C++, and Java.
   - Automatically queries the MongoDB collection to match structural copies from other users.
+- **Digital Certificates & Verification (Feature D)**: Manages automated and manual certificate issuance:
+  - **Auto-Allocation**: Instantly awards certificates on successful challenge completions: **3 Beginner**, **5 Intermediate**, or **10 Advanced** problems solved.
+  - **Manual Admin Issuance**: Interactive form in the Admin Panel to award custom certificates by student email.
+  - **Printable HTML Engine**: Serves customized, print-friendly certificate pages that trigger browser-native `window.print()` rendering (reducing server CPU/RAM load to 0%).
+  - **Adobe-Style Verification Seal**: Features a professional digital signature block containing dynamic dates, verification checkmark overlays, and location tags (Nashik).
 
 ---
 
