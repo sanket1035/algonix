@@ -104,12 +104,17 @@ function generateCertificateHTML(user, certificate) {
     day: 'numeric' 
   });
 
+  const earnedDate = new Date(certificate.earnedAt);
+  const yyyy = earnedDate.getFullYear();
+  const mm = String(earnedDate.getMonth() + 1).padStart(2, '0');
+  const dd = String(earnedDate.getDate()).padStart(2, '0');
+  const sigDateStr = `${yyyy}.${mm}.${dd}`;
+
   return `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="utf-8">
-      <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
       <style>
         body {
           font-family: 'Georgia', serif;
@@ -192,21 +197,34 @@ function generateCertificateHTML(user, certificate) {
           font-size: 14px;
           color: #7f8c8d;
         }
-        .signature {
-          text-align: center;
-        }
-        .signature-title {
-          font-family: 'Dancing Script', cursive;
-          font-size: 26px;
-          color: #667eea;
-          transform: rotate(-2deg);
-          margin-bottom: 2px;
+        .digital-signature {
+          position: relative;
           display: inline-block;
+          border: 1px solid #cbd5e1;
+          padding: 8px 12px;
+          border-radius: 4px;
+          background: #f8fafc;
+          width: 250px;
+          text-align: left;
+          box-sizing: border-box;
         }
-        .signature-text {
-          font-size: 13px;
-          color: #7f8c8d;
-          letter-spacing: 0.5px;
+        .checkmark-bg {
+          position: absolute;
+          right: 20px;
+          top: 50%;
+          transform: translateY(-50%) rotate(-10deg);
+          opacity: 0.2;
+          pointer-events: none;
+          z-index: 1;
+        }
+        .sig-info {
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 10px;
+          color: #334155;
+          line-height: 1.4;
+          font-weight: bold;
+          position: relative;
+          z-index: 2;
         }
         .badge {
           display: inline-block;
@@ -243,14 +261,18 @@ function generateCertificateHTML(user, certificate) {
           <div class="date">
             Issued on ${date}
           </div>
-          <div class="signature">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 2px;">
-              <span class="signature-title">Algonix Verification</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#10B981"/>
+          <div class="digital-signature">
+            <div class="checkmark-bg">
+              <svg width="70" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#10B981" />
               </svg>
             </div>
-            <div class="signature-text">Verified Secure Signature</div>
+            <div class="sig-info">
+              <div>Digitally signed by Algonix Founder</div>
+              <div>Date: ${sigDateStr}</div>
+              <div>Reason: Successful Completion</div>
+              <div>Location: Nashik</div>
+            </div>
           </div>
         </div>
       </div>
