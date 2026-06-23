@@ -10,6 +10,9 @@ A gamified coding skill development platform. Practice algorithms, earn badges, 
 - **Skill Tests** — MCQ-based fast-track unlocking by difficulty level
 - **Code Editor** — Monaco Editor with multi-language support (JS, Python, Java, C++)
 - **LeetCode-Style Submissions** — Write standard class or function-based solutions (`class Solution`, `def two_sum`, etc.). The platform automatically wraps and executes them with input-injecting test runners.
+- **Performance Profiling** — Microsecond-accurate runtimes (ms) and estimated memory footprints (MB) returned for every submission.
+- **Submission Rate-Limiting** — Anti-spam limits restricting submissions to 1 request every 5 seconds to prevent compiler abuse.
+- **Plagiarism Detection** — Structural AST analysis (Python) and keyword-aware regex token-normalization (JS, C++, Java) to catch copies from other users.
 - **Gamification** — Points, levels, badges, streaks, and certificates
 - **Leaderboards** — Weekly and all-time rankings
 - **Admin Panel** — Manage challenges, users, and platform stats
@@ -29,6 +32,18 @@ Algonix uses **Container-Native Execution** to compile and run student submissio
 - **No External Dependencies**: External whitelisted compilers (like public Piston) and DNS-blocked services (like Glot API) have been completely removed.
 - **Deployment-Isolated**: The deployment containers (on Render/Railway or local Docker) are pre-installed with `python3`, `g++`, and `openjdk17-jdk`. Submissions are executed natively and securely inside the container.
 - **Local Fallback**: During local development, the backend will automatically compile and run code using your local computer's native runtimes, requiring zero Docker configuration.
+
+---
+
+## Advanced Interview & Tech Features
+
+To stand out in technical interviews, Algonix implements advanced platform security and analysis features:
+- **Performance Profiling (Feature A)**: Employs microsecond-accurate child process execution measurement (`process.hrtime.bigint()`) and custom memory baseline heuristics to calculate and return exact execution times (ms) and peak memory footprints (MB) consumed per test case.
+- **Submission Rate-Limiting (Feature B)**: Prevents server resource exhaustion or execution pool spam by throttling submissions to **1 request every 5 seconds** via Express middleware.
+- **Anti-Plagiarism Engine (Feature C)**: Validates code uniqueness by generating structural syntax fingerprints:
+  - **Python AST Analyzer**: Compiles source code to an Abstract Syntax Tree (AST), stripping local identifiers, function names, and constants to map the raw logical structure.
+  - **Token Regex Normalizer**: Strips comments/spaces and maps language-specific tokens (variables, keywords, declarations, types) to a generic trace across JavaScript, C++, and Java.
+  - Automatically queries the MongoDB collection to match structural copies from other users.
 
 ---
 
@@ -106,7 +121,8 @@ FRONTEND_URL=http://localhost:3000
 
 - JWT authentication with 7-day expiry
 - bcrypt password hashing
-- Nginx rate limiting (API: 10 req/s, login: 5 req/min)
+- **Submission Rate-Limiting** — Throttled to 1 request every 5 seconds per user IP/ID via application-level Express rate limiting
+- **Nginx Rate Limiting** — API limited to 10 req/s, login to 5 req/min
 - CORS restricted to configured origins
 - Security headers via Nginx
 
