@@ -16,7 +16,7 @@ import {
   CardContent,
   Divider,
 } from '@mui/material';
-import { PlayArrow, Send, CheckCircle, Error } from '@mui/icons-material';
+import { PlayArrow, Send, CheckCircle, Error as ErrorIcon } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Editor from '@monaco-editor/react';
@@ -35,14 +35,21 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
   </div>
 );
 
+type Language = 'javascript' | 'python' | 'java' | 'cpp';
+
 const ChallengeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   
   const [activeTab, setActiveTab] = useState(0);
-  const [codesByLanguage, setCodesByLanguage] = useState<Record<string, string>>({});
-  const [language, setLanguage] = useState('javascript');
+  const [codesByLanguage, setCodesByLanguage] = useState<Record<Language, string>>({
+    javascript: '',
+    python: '',
+    java: '',
+    cpp: '',
+  });
+  const [language, setLanguage] = useState<Language>('javascript');
   const [submissionResult, setSubmissionResult] = useState<any>(null);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
 
@@ -69,8 +76,8 @@ const ChallengeDetail: React.FC = () => {
     },
   });
 
-  const getDefaultStarterCode = (lang: string) => {
-    const templates: Record<string, string> = {
+  const getDefaultStarterCode = (lang: Language) => {
+    const templates: Record<Language, string> = {
       javascript: `// Write your JavaScript solution here\nfunction solve(nums, target) {\n  // TODO: implement solution\n  return [];\n}`,
       python: `# Write your Python solution here\ndef solve(nums, target):\n    # TODO: implement solution\n    pass`,
       java: `// Write your Java solution here\nimport java.util.*;\npublic class Solution {\n    public static int[] solve(int[] nums, int target) {\n        // TODO: implement solution\n        return new int[0];\n    }\n}`,
@@ -82,7 +89,7 @@ const ChallengeDetail: React.FC = () => {
   React.useEffect(() => {
     if (!challenge) return;
 
-    const nextCodes: Record<string, string> = {
+    const nextCodes: Record<Language, string> = {
       javascript: challenge.starterCode?.javascript || getDefaultStarterCode('javascript'),
       python: challenge.starterCode?.python || getDefaultStarterCode('python'),
       java: challenge.starterCode?.java || getDefaultStarterCode('java'),
@@ -99,6 +106,13 @@ const ChallengeDetail: React.FC = () => {
 
   const code = codesByLanguage[language] || '';
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
+
+  const handleCodeChange = (value: string | undefined) => {
+    setCodesByLanguage((prev) => ({
+      ...prev,
+      [language]: value || '',
+    }));
+  };
 
   const isPlaceholderCode = (source: string) => {
     const stripped = source
@@ -323,7 +337,7 @@ const ChallengeDetail: React.FC = () => {
             <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  {['javascript', 'python', 'java', 'cpp'].map((lang) => (
+                  {(['javascript', 'python', 'java', 'cpp'] as Language[]).map((lang) => (
                     <Button
                       key={lang}
                       variant={language === lang ? 'contained' : 'outlined'}
@@ -402,7 +416,7 @@ const ChallengeDetail: React.FC = () => {
               <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
                 <Alert
                   severity={submissionResult.judgeServiceUnavailable ? 'warning' : submissionResult.status === 'Accepted' ? 'success' : 'error'}
-                  icon={submissionResult.judgeServiceUnavailable ? <Error /> : submissionResult.status === 'Accepted' ? <CheckCircle /> : <Error />}
+                  icon={submissionResult.judgeServiceUnavailable ? <ErrorIcon /> : submissionResult.status === 'Accepted' ? <CheckCircle /> : <ErrorIcon />}
                 >
                   <Typography variant="subtitle2">
                     {submissionResult.message} - Score: {submissionResult.score}%
