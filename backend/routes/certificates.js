@@ -20,7 +20,14 @@ router.get('/generate/:certificateId', auth, async (req, res) => {
     
     const launchArgs = {
       headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--no-zygote',
+        '--single-process'
+      ]
     };
     
     if (process.env.PUPPETEER_EXECUTABLE_PATH) {
