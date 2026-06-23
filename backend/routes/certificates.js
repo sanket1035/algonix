@@ -109,6 +109,7 @@ function generateCertificateHTML(user, certificate) {
     <html>
     <head>
       <meta charset="utf-8">
+      <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
       <style>
         body {
           font-family: 'Georgia', serif;
@@ -194,14 +195,18 @@ function generateCertificateHTML(user, certificate) {
         .signature {
           text-align: center;
         }
-        .signature-line {
-          border-top: 2px solid #2c3e50;
-          width: 200px;
-          margin-bottom: 10px;
+        .signature-title {
+          font-family: 'Dancing Script', cursive;
+          font-size: 26px;
+          color: #667eea;
+          transform: rotate(-2deg);
+          margin-bottom: 2px;
+          display: inline-block;
         }
         .signature-text {
-          font-size: 14px;
+          font-size: 13px;
           color: #7f8c8d;
+          letter-spacing: 0.5px;
         }
         .badge {
           display: inline-block;
@@ -239,8 +244,13 @@ function generateCertificateHTML(user, certificate) {
             Issued on ${date}
           </div>
           <div class="signature">
-            <div class="signature-line"></div>
-            <div class="signature-text">Algonix Platform</div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 2px;">
+              <span class="signature-title">Algonix Verification</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#10B981"/>
+              </svg>
+            </div>
+            <div class="signature-text">Verified Secure Signature</div>
           </div>
         </div>
       </div>
