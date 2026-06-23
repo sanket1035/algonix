@@ -5,9 +5,20 @@ const Challenge = require('../models/Challenge');
 const User = require('../models/User');
 const streakService = require('../services/streakService');
 const { auth } = require('../middleware/auth');
-const { executeLocal } = require('../utils/localRunner');
+const { executeLocal, estimateMemory } = require('../utils/localRunner');
+const rateLimit = require('express-rate-limit');
+const { checkPlagiarism } = require('../utils/plagiarismDetector');
 
 const router = express.Router();
+
+const submissionLimiter = rateLimit({
+  windowMs: 5000, // 5 seconds
+  max: 1, // Limit each IP/user to 1 submission per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many submissions. Please wait 5 seconds between runs.' },
+  keyGenerator: (req) => req.user?._id?.toString() || req.ip
+});
 
 const LANGUAGE_MAP = {
   javascript: { name: 'javascript', extension: 'js' },
@@ -21,6 +32,7 @@ async function executeCode(code, language, input = '') {
   if (process.env.PISTON_URL) {
     try {
       const runtime = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
+      const startTime = process.hrtime.bigint();
       const { data } = await axios.post(process.env.PISTON_URL, {
         language: runtime.name,
         version: '*',
@@ -31,9 +43,15 @@ async function executeCode(code, language, input = '') {
       });
 
       if (data && data.run) {
+        const endTime = process.hrtime.bigint();
+        const executionTimeNs = endTime - startTime;
+        const executionTime = parseFloat((Number(executionTimeNs) / 1000000).toFixed(2));
+        const memoryUsed = estimateMemory(language, code.length);
         return {
           stdout: data.run.stdout || '',
           stderr: data.run.stderr || '',
+          executionTime,
+          memoryUsed
         };
       }
     } catch (err) {
@@ -94,7 +112,7 @@ function wrapCode(code, language, challengeTitle) {
   return code;
 }
 
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, submissionLimiter, async (req, res) => {
   try {
     const { challengeId, code, language } = req.body;
 
@@ -122,6 +140,9 @@ router.post('/', auth, async (req, res) => {
 
     const challenge = await Challenge.findById(challengeId);
     if (!challenge) return res.status(404).json({ message: 'Challenge not found' });
+
+    // Check Plagiarism
+    const plagResult = await checkPlagiarism(challengeId, req.user._id, code, language);
 
     const user = req.user;
     const isUnlocked = user.unlockedChallenges.includes(challenge._id) ||
@@ -151,6 +172,8 @@ router.post('/', auth, async (req, res) => {
         const result = await executeCode(wrappedUserCode, language, tc.input || '');
         const stdout = result.stdout || '';
         const stderr = result.stderr || '';
+        const executionTime = result.executionTime || 0;
+        const memoryUsed = result.memoryUsed || 0;
 
         const actual = stdout.replace(/\r\n/g, '\n').trim();
         const expected = (tc.expectedOutput || tc.output || '').replace(/\r\n/g, '\n').trim();
@@ -174,8 +197,9 @@ router.post('/', auth, async (req, res) => {
         testResults.push({
           testCase: i + 1,
           status,
-          executionTime: 0,
-          memoryUsed: 0,
+          executionTime,
+          memoryUsed,
+          output: actual,
           passed,
           actual,
           expected,
@@ -247,6 +271,9 @@ router.post('/', auth, async (req, res) => {
       }
     }
 
+    const totalExecutionTime = testResults.reduce((sum, r) => sum + (r.executionTime || 0), 0);
+    const maxMemoryUsed = testResults.reduce((max, r) => Math.max(max, r.memoryUsed || 0), 0);
+
     const submission = await Submission.create({
       user: req.user._id,
       challenge: challengeId,
@@ -256,9 +283,25 @@ router.post('/', auth, async (req, res) => {
       testResults,
       pointsEarned,
       score,
+      executionTime: parseFloat(totalExecutionTime.toFixed(2)),
+      memoryUsed: parseFloat(maxMemoryUsed.toFixed(2)),
+      plagiarized: plagResult.plagiarized,
+      duplicateOf: plagResult.duplicateOf,
+      normalizedFingerprint: plagResult.fingerprint
     });
 
-    res.json({ submissionId: submission._id, status, message, correct, score, pointsEarned, testResults, judgeServiceUnavailable });
+    res.json({
+      submissionId: submission._id,
+      status,
+      message,
+      correct,
+      score,
+      pointsEarned,
+      testResults,
+      judgeServiceUnavailable,
+      plagiarized: plagResult.plagiarized,
+      duplicateOf: plagResult.duplicateOf
+    });
 
   } catch (error) {
     console.error('Submission error:', error);

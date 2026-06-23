@@ -21,7 +21,10 @@ const submissionSchema = new mongoose.Schema({
     error: String
   }],
   score: { type: Number, default: 0 },
-  pointsEarned: { type: Number, default: 0 }
+  pointsEarned: { type: Number, default: 0 },
+  plagiarized: { type: Boolean, default: false },
+  duplicateOf: { type: mongoose.Schema.Types.ObjectId, ref: 'Submission' },
+  normalizedFingerprint: String
 }, { timestamps: true });
 
 module.exports = mongoose.model('Submission', submissionSchema);
