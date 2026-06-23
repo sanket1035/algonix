@@ -28,7 +28,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { certificatesAPI } from '../services/api';
+import { certificatesAPI, API_BASE_URL } from '../services/api';
 
 const Profile: React.FC = () => {
   const { user, updateProfile } = useAuth();
@@ -57,10 +57,7 @@ const Profile: React.FC = () => {
 
   const handleDownloadCertificate = (certificateId: string, certificateName: string) => {
     const token = localStorage.getItem('token');
-    const apiBase = window.location.origin.includes('localhost:3000') 
-      ? 'http://localhost:5000' 
-      : '';
-    const url = `${apiBase}/api/certificates/view/${certificateId}?token=${token}`;
+    const url = `${API_BASE_URL}/certificates/view/${certificateId}?token=${token}`;
     window.open(url, '_blank');
   };
 
