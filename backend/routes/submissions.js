@@ -5,6 +5,7 @@ const Challenge = require('../models/Challenge');
 const User = require('../models/User');
 const streakService = require('../services/streakService');
 const { auth } = require('../middleware/auth');
+const { executeLocal } = require('../utils/localRunner');
 
 const router = express.Router();
 
@@ -15,51 +16,33 @@ const LANGUAGE_MAP = {
   cpp: { name: 'cpp', extension: 'cpp' },
 };
 
-async function executeCode(code, language) {
-  const token = process.env.GLOT_TOKEN || process.env.GLOT_API_TOKEN;
+async function executeCode(code, language, input = '') {
+  // We try Piston only if it is explicitly configured in the environment.
+  if (process.env.PISTON_URL) {
+    try {
+      const runtime = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
+      const { data } = await axios.post(process.env.PISTON_URL, {
+        language: runtime.name,
+        version: '*',
+        files: [{ name: `main.${runtime.extension}`, content: code }],
+        stdin: input || '',
+      }, {
+        timeout: 20000,
+      });
 
-  // 1. If GLOT_TOKEN is configured (Production/Render), use Glot API
-  if (token) {
-    const runtime = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
-    const { data } = await axios.post(`https://run.glot.io/languages/${runtime.name}/latest`, {
-      files: [{ name: `main.${runtime.extension}`, content: code }]
-    }, {
-      timeout: 20000,
-      headers: {
-        Authorization: `Token ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!data) {
-      throw new Error('Unexpected Glot response');
+      if (data && data.run) {
+        return {
+          stdout: data.run.stdout || '',
+          stderr: data.run.stderr || '',
+        };
+      }
+    } catch (err) {
+      console.warn(`Piston API execution failed: ${err.message}. Falling back to container native execution...`);
     }
-
-    return {
-      stdout: data.stdout || '',
-      stderr: data.stderr || data.error || '',
-    };
   }
 
-  // 2. If no GLOT_TOKEN is set (Local Development), fall back to local Piston container
-  const PISTON_URL = process.env.PISTON_URL || 'http://localhost:2000/api/v2/execute';
-  const runtime = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
-  const { data } = await axios.post(PISTON_URL, {
-    language: runtime.name,
-    version: '*',
-    files: [{ name: `main.${runtime.extension}`, content: code }],
-  }, {
-    timeout: 20000,
-  });
-
-  if (!data || !data.run) {
-    throw new Error('Unexpected Piston response');
-  }
-
-  return {
-    stdout: data.run.stdout || '',
-    stderr: data.run.stderr || '',
-  };
+  // Otherwise, compile and execute code natively inside the host/deployment container
+  return await executeLocal(code, language, input);
 }
 
 router.post('/', auth, async (req, res) => {
@@ -114,12 +97,12 @@ router.post('/', auth, async (req, res) => {
     for (let i = 0; i < testCasesToRun.length; i++) {
       const tc = testCasesToRun[i];
       try {
-        const result = await executeCode(code, language);
+        const result = await executeCode(code, language, tc.input || '');
         const stdout = result.stdout || '';
         const stderr = result.stderr || '';
 
-        const actual = stdout.trim();
-        const expected = (tc.output || '').trim();
+        const actual = stdout.replace(/\r\n/g, '\n').trim();
+        const expected = (tc.expectedOutput || tc.output || '').replace(/\r\n/g, '\n').trim();
 
         let status = 'Wrong Answer';
         let passed = false;
@@ -127,10 +110,10 @@ router.post('/', auth, async (req, res) => {
 
         if (stderr.trim() !== '') {
           status = 'Runtime Error';
-        } else if (stdout.trim() === '') {
+        } else if (actual === '') {
           status = 'Wrong Answer';
           error = 'No output produced by code';
-        } else if (stdout.trim() === expected) {
+        } else if (actual === expected) {
           status = 'Accepted';
           passed = true;
         }

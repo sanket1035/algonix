@@ -14,6 +14,7 @@ const challengeSchema = new mongoose.Schema({
   memoryLimit: { type: Number, default: 128 }, // MB
   testCases: [{
     input: String,
+    output: String,
     expectedOutput: String,
     isHidden: { type: Boolean, default: false }
   }],
