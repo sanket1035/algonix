@@ -18,10 +18,16 @@ router.get('/generate/:certificateId', auth, async (req, res) => {
 
     const html = generateCertificateHTML(req.user, certificate);
     
-    const browser = await puppeteer.launch({
+    const launchArgs = {
       headless: 'new',
       args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+    };
+    
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+      launchArgs.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    }
+
+    const browser = await puppeteer.launch(launchArgs);
     
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
