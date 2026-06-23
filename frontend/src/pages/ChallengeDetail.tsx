@@ -99,15 +99,32 @@ const ChallengeDetail: React.FC = () => {
 
   const code = codesByLanguage[language] || '';
 
-  const handleCodeChange = (value: string | undefined) => {
-    setCodesByLanguage((prev) => ({
-      ...prev,
-      [language]: value || '',
-    }));
+  const isPlaceholderCode = (source: string) => {
+    const stripped = source
+      .replace(/\/\/.*$/gm, '')
+      .replace(/#.*$/gm, '')
+      .replace(/\/\*[\s\S]*?\*\//gm, '')
+      .replace(/\s+/g, '')
+      .toLowerCase();
+
+    return (
+      !stripped ||
+      stripped === 'pass' ||
+      stripped.includes('todo') ||
+      stripped === 'return;' ||
+      stripped === 'return' ||
+      stripped === 'thrownewerror();' ||
+      stripped === 'thrownewerror'
+    );
   };
 
   const handleSubmit = () => {
-    if (!id || !code.trim()) return;
+    if (!id) return;
+    if (!code.trim() || isPlaceholderCode(code)) {
+      setSubmissionError('Please write your solution before submitting.');
+      return;
+    }
+
     setSubmissionError(null);
     submitMutation.mutate({
       challengeId: id,
