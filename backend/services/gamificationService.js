@@ -161,14 +161,14 @@ class GamificationService {
     const certificates = [];
     const existingCerts = user.certificates.map(c => c.name);
 
-    // Beginner certificate (10 beginner problems)
+    // Beginner certificate (3 beginner problems)
     if (!existingCerts.includes('Beginner Mastery')) {
       const beginnerCount = await Challenge.countDocuments({
         _id: { $in: user.solvedChallenges },
         difficulty: 'Beginner'
       });
       
-      if (beginnerCount >= 10) {
+      if (beginnerCount >= 3) {
         certificates.push({
           name: 'Beginner Mastery',
           level: 'Beginner',
@@ -177,14 +177,14 @@ class GamificationService {
       }
     }
 
-    // Intermediate certificate (15 intermediate problems)
+    // Intermediate certificate (5 intermediate problems)
     if (!existingCerts.includes('Intermediate Mastery')) {
       const intermediateCount = await Challenge.countDocuments({
         _id: { $in: user.solvedChallenges },
         difficulty: 'Intermediate'
       });
       
-      if (intermediateCount >= 15) {
+      if (intermediateCount >= 5) {
         certificates.push({
           name: 'Intermediate Mastery',
           level: 'Intermediate',
@@ -193,14 +193,14 @@ class GamificationService {
       }
     }
 
-    // Advanced certificate (20 advanced problems)
+    // Advanced certificate (10 advanced problems)
     if (!existingCerts.includes('Advanced Mastery')) {
       const advancedCount = await Challenge.countDocuments({
         _id: { $in: user.solvedChallenges },
         difficulty: 'Advanced'
       });
       
-      if (advancedCount >= 20) {
+      if (advancedCount >= 10) {
         certificates.push({
           name: 'Advanced Mastery',
           level: 'Advanced',

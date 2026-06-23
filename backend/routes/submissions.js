@@ -260,6 +260,9 @@ router.post('/', auth, submissionLimiter, async (req, res) => {
         const updatedUser = await User.findById(req.user._id);
         await streakService.checkProblemSolverBadges(updatedUser);
 
+        const gamificationService = require('../services/gamificationService');
+        await gamificationService.checkCertificates(updatedUser);
+
         // Unlock next difficulty
         const unlockDifficulty = newLevel === 2 ? 'Intermediate' : newLevel === 3 ? 'Advanced' : newLevel === 4 ? 'Expert' : null;
         if (unlockDifficulty) {

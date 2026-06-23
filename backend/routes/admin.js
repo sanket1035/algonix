@@ -158,4 +158,40 @@ router.post('/reset-weekly', adminAuth, async (req, res) => {
   }
 });
 
+// Issue certificate manually
+router.post('/issue-certificate', adminAuth, async (req, res) => {
+  try {
+    const { email, certificateType } = req.body;
+
+    if (!email || !certificateType) {
+      return res.status(400).json({ message: 'Email and certificate type are required' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const existingCertNames = user.certificates.map(c => c.name);
+    if (existingCertNames.includes(certificateType)) {
+      return res.status(400).json({ message: 'User already has this certificate' });
+    }
+
+    let level = 'Beginner';
+    if (certificateType === 'Intermediate Mastery') level = 'Intermediate';
+    else if (certificateType === 'Advanced Mastery') level = 'Advanced';
+
+    user.certificates.push({
+      name: certificateType,
+      level,
+      earnedAt: new Date()
+    });
+
+    await user.save();
+    res.json({ message: 'Certificate issued successfully', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 module.exports = router;

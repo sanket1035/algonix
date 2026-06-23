@@ -158,6 +158,11 @@ export const adminAPI = {
     const response = await api.post('/admin/reset-weekly');
     return response.data;
   },
+
+  issueCertificate: async (email: string, certificateType: string) => {
+    const response = await api.post('/admin/issue-certificate', { email, certificateType });
+    return response.data;
+  },
 };
 
 export default api;

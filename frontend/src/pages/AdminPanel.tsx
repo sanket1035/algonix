@@ -78,6 +78,9 @@ const AdminPanel: React.FC = () => {
     },
   });
 
+  const [certEmail, setCertEmail] = useState('');
+  const [certType, setCertType] = useState('Beginner Mastery');
+
   const { data: challenges } = useQuery({
     queryKey: ['admin-challenges'],
     queryFn: adminAPI.getChallenges,
@@ -118,6 +121,27 @@ const AdminPanel: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-challenges'] });
     },
   });
+
+  const issueCertMutation = useMutation({
+    mutationFn: ({ email, type }: { email: string; type: string }) => adminAPI.issueCertificate(email, type),
+    onSuccess: (data: any) => {
+      alert(data.message || 'Certificate issued successfully!');
+      setCertEmail('');
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+    },
+    onError: (error: any) => {
+      const errMsg = error.response?.data?.message || error.message || 'Failed to issue certificate';
+      alert(errMsg);
+    }
+  });
+
+  const handleIssueCertificate = () => {
+    if (!certEmail.trim()) {
+      alert('Please enter a student email.');
+      return;
+    }
+    issueCertMutation.mutate({ email: certEmail, type: certType });
+  };
 
   const resetChallengeForm = () => {
     setChallengeForm({
@@ -603,10 +627,16 @@ const AdminPanel: React.FC = () => {
                       placeholder="student@example.com"
                       size="small"
                       fullWidth
+                      value={certEmail}
+                      onChange={(e) => setCertEmail(e.target.value)}
                     />
                     <FormControl size="small" fullWidth>
                       <InputLabel>Certificate Type</InputLabel>
-                      <Select label="Certificate Type">
+                      <Select 
+                        label="Certificate Type"
+                        value={certType}
+                        onChange={(e) => setCertType(e.target.value as string)}
+                      >
                         <MenuItem value="Beginner Mastery">🥉 Beginner Mastery</MenuItem>
                         <MenuItem value="Intermediate Mastery">🥈 Intermediate Mastery</MenuItem>
                         <MenuItem value="Advanced Mastery">🥇 Advanced Mastery</MenuItem>
@@ -616,6 +646,7 @@ const AdminPanel: React.FC = () => {
                       variant="outlined" 
                       startIcon={<Add />}
                       fullWidth
+                      onClick={handleIssueCertificate}
                     >
                       Issue Certificate
                     </Button>
@@ -640,7 +671,7 @@ const AdminPanel: React.FC = () => {
                       🥉 Beginner Mastery
                     </Typography>
                     <Typography variant="body2">
-                      Auto-awarded after solving 10 Beginner level problems
+                      Auto-awarded after solving 3 Beginner level problems
                     </Typography>
                   </Box>
                 </Grid>
@@ -650,7 +681,7 @@ const AdminPanel: React.FC = () => {
                       🥈 Intermediate Mastery
                     </Typography>
                     <Typography variant="body2">
-                      Auto-awarded after solving 15 Intermediate level problems
+                      Auto-awarded after solving 5 Intermediate level problems
                     </Typography>
                   </Box>
                 </Grid>
@@ -660,7 +691,7 @@ const AdminPanel: React.FC = () => {
                       🥇 Advanced Mastery
                     </Typography>
                     <Typography variant="body2">
-                      Auto-awarded after solving 20 Advanced level problems
+                      Auto-awarded after solving 10 Advanced level problems
                     </Typography>
                   </Box>
                 </Grid>
