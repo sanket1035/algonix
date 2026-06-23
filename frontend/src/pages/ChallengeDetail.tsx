@@ -166,6 +166,20 @@ const ChallengeDetail: React.FC = () => {
       return;
     }
 
+    const PLACEHOLDER_PATTERNS = [
+      '// TODO: implement solution',
+      '// Write your',
+      'return [];',
+    ];
+
+    const isPlaceholder = PLACEHOLDER_PATTERNS.some(p => code.includes(p)) 
+      || code.trim().length < 50;
+
+    if (isPlaceholder) {
+      setSubmissionError('Please write your actual solution before submitting!');
+      return;
+    }
+
     setSubmissionError(null);
     submitMutation.mutate({
       challengeId: id,

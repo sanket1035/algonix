@@ -15,30 +15,19 @@ const LANGUAGE_MAP = {
   cpp: { name: 'cpp', extension: 'cpp' },
 };
 
-const LANGUAGE_VERSIONS = {
-  javascript: '18.15.0',
-  python: '3.10.0',
-  java: '15.0.2',
-  cpp: '10.2.0',
-};
-
-const GLOT_API_URL = process.env.GLOT_API_URL || 'https://glot.io/api/run';
-const GLOT_API_TOKEN = process.env.GLOT_API_TOKEN;
-const PISTON_EXECUTE_URL = process.env.PISTON_URL || 'https://emkc.org/api/v2/piston/execute';
-
-async function runGlot(code, language, input) {
+async function runGlot(code, language) {
   const runtime = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
-  if (!GLOT_API_TOKEN) {
-    throw new Error('GLOT_API_TOKEN is not configured');
+  const token = process.env.GLOT_TOKEN;
+  if (!token) {
+    throw new Error('GLOT_TOKEN is not configured');
   }
 
-  const { data } = await axios.post(`${GLOT_API_URL}/${runtime.name}/latest`, {
-    files: [{ name: `main.${runtime.extension}`, content: code }],
-    stdin: input || '',
+  const { data } = await axios.post(`https://run.glot.io/languages/${runtime.name}/latest`, {
+    files: [{ name: `main.${runtime.extension}`, content: code }]
   }, {
     timeout: 20000,
     headers: {
-      Authorization: `Token ${GLOT_API_TOKEN}`,
+      Authorization: `Token ${token}`,
       'Content-Type': 'application/json',
     },
   });
@@ -50,89 +39,7 @@ async function runGlot(code, language, input) {
   return {
     stdout: data.stdout || '',
     stderr: data.stderr || data.error || '',
-    code: typeof data.exitCode === 'number' ? data.exitCode : (data.error ? 1 : 0),
-    output: data.stdout || '',
   };
-}
-
-async function runPiston(code, language, input) {
-  const runtime = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
-
-  const { data } = await axios.post(PISTON_EXECUTE_URL, {
-    language: runtime.name,
-    version: LANGUAGE_VERSIONS[language] || '*',
-    files: [{ name: `Main.${runtime.extension}`, content: code }],
-    stdin: input || '',
-  }, {
-    timeout: 20000,
-  });
-
-  if (!data || !data.run) {
-    throw new Error('Unexpected Piston response');
-  }
-
-  return {
-    stdout: data.run.stdout,
-    stderr: data.run.stderr,
-    code: data.run.code,
-    output: data.run.output,
-  };
-}
-
-async function runCodeExecution(code, language, input) {
-  if (GLOT_API_TOKEN) {
-    return runGlot(code, language, input);
-  }
-
-  if (PISTON_EXECUTE_URL && PISTON_EXECUTE_URL !== 'https://emkc.org/api/v2/piston/execute') {
-    return runPiston(code, language, input);
-  }
-
-  throw new Error('Execution service is not configured. Set GLOT_API_TOKEN for Glot or PISTON_URL for a self-hosted Piston instance.');
-}
-
-function normalizeOutput(str) {
-  return (str || '').trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-}
-
-function parseOutput(value) {
-  const normalized = normalizeOutput(value);
-  try {
-    return JSON.parse(normalized);
-  } catch {
-    return normalized;
-  }
-}
-
-function compareOutputs(actualRaw, expectedRaw) {
-  const actual = parseOutput(actualRaw);
-  const expected = parseOutput(expectedRaw);
-
-  if (typeof actual === 'string' && typeof expected === 'string') {
-    if (actual === expected) return true;
-    const whitespaceNormalizedActual = actual.replace(/\s+/g, ' ').trim();
-    const whitespaceNormalizedExpected = expected.replace(/\s+/g, ' ').trim();
-    return whitespaceNormalizedActual === whitespaceNormalizedExpected;
-  }
-
-  if (typeof actual === 'boolean' && typeof expected === 'boolean') {
-    return actual === expected;
-  }
-
-  if (typeof actual === 'number' && typeof expected === 'number') {
-    return actual === expected;
-  }
-
-  if (Array.isArray(actual) && Array.isArray(expected)) {
-    if (actual.length !== expected.length) return false;
-    return actual.every((item, idx) => JSON.stringify(item) === JSON.stringify(expected[idx]));
-  }
-
-  if (actual && expected && typeof actual === 'object' && typeof expected === 'object') {
-    return JSON.stringify(actual) === JSON.stringify(expected);
-  }
-
-  return actual === expected;
 }
 
 router.post('/', auth, async (req, res) => {
@@ -187,26 +94,32 @@ router.post('/', auth, async (req, res) => {
     for (let i = 0; i < testCasesToRun.length; i++) {
       const tc = testCasesToRun[i];
       try {
-        const result = await runCodeExecution(code, language, tc.input || '');
-        const actual = normalizeOutput(result.stdout || result.output || '');
-        const expected = normalizeOutput(tc.expectedOutput || tc.output || '');
-        
-        // A test passes if the actual output matches expected output
-        // Exit code errors are only counted if there's no output
-        const hasRuntimeError = result.stderr && result.stderr.trim() !== '';
-        const passed = !hasRuntimeError && compareOutputs(actual, expected);
-        if (!passed) allPassed = false;
+        const result = await runGlot(code, language);
+        const stdout = result.stdout || '';
+        const stderr = result.stderr || '';
 
-        let error = result.stderr || undefined;
-        if (!passed && !expected) {
-          error = 'Missing expected output for test case';
-        } else if (!passed && expected && actual === '') {
-          error = error || 'No output produced by code';
+        const actual = stdout.trim();
+        const expected = (tc.output || '').trim();
+
+        let status = 'Wrong Answer';
+        let passed = false;
+        let error = stderr.trim() || undefined;
+
+        if (stderr.trim() !== '') {
+          status = 'Runtime Error';
+        } else if (stdout.trim() === '') {
+          status = 'Wrong Answer';
+          error = 'No output produced by code';
+        } else if (stdout.trim() === expected) {
+          status = 'Accepted';
+          passed = true;
         }
+
+        if (!passed) allPassed = false;
 
         testResults.push({
           testCase: i + 1,
-          status: passed ? 'Accepted' : (result.stderr ? 'Runtime Error' : 'Wrong Answer'),
+          status,
           executionTime: 0,
           memoryUsed: 0,
           passed,
@@ -238,6 +151,7 @@ router.post('/', auth, async (req, res) => {
         });
       }
     }
+
     const correct = allPassed && !judgeServiceUnavailable;
     const message = allPassed
       ? 'Accepted'
