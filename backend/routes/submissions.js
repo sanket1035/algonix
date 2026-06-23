@@ -180,8 +180,16 @@ router.post('/', auth, async (req, res) => {
         const result = await runCodeExecution(code, language, tc.input || '');
         const actual = normalizeOutput(result.stdout || result.output);
         const expected = normalizeOutput(tc.expectedOutput || tc.output);
-        const passed = (result.code === 0 || result.code === undefined) && compareOutputs(actual, expected);
+        const validOutput = expected !== '';
+        const passed = validOutput && (result.code === 0 || result.code === undefined) && compareOutputs(actual, expected);
         if (!passed) allPassed = false;
+
+        let error = result.stderr || undefined;
+        if (!passed && !validOutput) {
+          error = 'Missing expected output for test case';
+        } else if (!passed && validOutput && actual === '') {
+          error = error || 'No output produced by code';
+        }
 
         testResults.push({
           testCase: i + 1,
@@ -191,7 +199,7 @@ router.post('/', auth, async (req, res) => {
           passed,
           actual,
           expected,
-          error: result.stderr || undefined,
+          error,
         });
       } catch (e) {
         const errorMessage = e.response?.data?.message || e.message;
