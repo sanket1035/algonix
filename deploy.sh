@@ -24,7 +24,7 @@ if [ ! -f backend/.env ]; then
     echo "📝 Creating environment file..."
     cp backend/.env.example backend/.env
     echo "⚠️  Please edit backend/.env with your configuration before continuing."
-    echo "   Required: MONGODB_URI, JWT_SECRET, RAPIDAPI_KEY"
+    echo "   Required: MONGODB_URI, JWT_SECRET"
     read -p "Press Enter after configuring the environment file..."
 fi
 

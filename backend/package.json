@@ -19,7 +19,9 @@
     "node-cron": "^3.0.2",
     "express-rate-limit": "^6.10.0",
     "helmet": "^7.0.0",
-    "express-validator": "^7.0.1"
+    "express-validator": "^7.0.1",
+    "compression": "^1.7.4",
+    "express-mongo-sanitize": "^2.2.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

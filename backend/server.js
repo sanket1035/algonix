@@ -4,10 +4,27 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const cron = require('node-cron');
 const path = require('path');
+const helmet = require('helmet');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
 
 dotenv.config();
 
 const app = express();
+
+// Security and performance middleware
+app.use(helmet());
+app.use(compression());
+app.use(mongoSanitize());
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many login attempts. Please try again after 15 minutes.' },
+});
 
 // Middleware
 app.use(cors({
@@ -24,6 +41,8 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+
+app.use('/api/auth/login', authLimiter);
 
 // Health check route
 app.get('/health', (req, res) => {

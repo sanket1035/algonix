@@ -52,12 +52,14 @@ router.get('/:id', auth, async (req, res) => {
     }
 
     const user = await User.findById(req.user._id);
-    const isUnlocked = user.unlockedChallenges.includes(challenge._id) || 
+    const solvedIds = user.solvedChallenges.map((id) => id.toString());
+    const prerequisiteIds = challenge.prerequisites.map((id) => id.toString());
+    const hasPrerequisite = prerequisiteIds.some((prereqId) => solvedIds.includes(prereqId));
+
+    const isUnlocked = user.unlockedChallenges.map((id) => id.toString()).includes(challenge._id.toString()) ||
                       challenge.fastTrackUnlock ||
                       challenge.difficulty === 'Beginner' ||
-                      user.solvedChallenges.some(solvedId => 
-                        challenge.prerequisites.includes(solvedId)
-                      );
+                      hasPrerequisite;
 
     // Hide hidden test cases from response
     const challengeData = challenge.toObject();
