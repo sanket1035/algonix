@@ -98,6 +98,7 @@ const ChallengeDetail: React.FC = () => {
   }, [challenge]);
 
   const code = codesByLanguage[language] || '';
+  const [copyMessage, setCopyMessage] = useState<string | null>(null);
 
   const isPlaceholderCode = (source: string) => {
     const stripped = source
@@ -118,10 +119,36 @@ const ChallengeDetail: React.FC = () => {
     );
   };
 
+  const handleClearCode = () => {
+    setCodesByLanguage((prev) => ({
+      ...prev,
+      [language]: '',
+    }));
+    setCopyMessage(null);
+    setSubmissionError(null);
+  };
+
+  const handleCopyStarterCode = async () => {
+    const starterCode = challenge?.starterCode?.[language] || getDefaultStarterCode(language);
+    try {
+      if (!navigator.clipboard) {
+        throw new Error('Clipboard API unavailable');
+      }
+      await navigator.clipboard.writeText(starterCode);
+      setCopyMessage('Starter code copied to clipboard.');
+    } catch (err) {
+      setCopyMessage('Unable to copy starter code.');
+    }
+  };
+
   const handleSubmit = () => {
     if (!id) return;
+    if (!challenge?.isUnlocked) {
+      setSubmissionError('This challenge is locked. Unlock it before submitting.');
+      return;
+    }
     if (!code.trim() || isPlaceholderCode(code)) {
-      setSubmissionError('Please write your solution before submitting.');
+      setSubmissionError('Please write a valid solution before submitting.');
       return;
     }
 
@@ -294,8 +321,8 @@ const ChallengeDetail: React.FC = () => {
         <Grid item xs={12} md={6}>
           <Paper sx={{ height: 'calc(100vh - 150px)', display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                   {['javascript', 'python', 'java', 'cpp'].map((lang) => (
                     <Button
                       key={lang}
@@ -307,15 +334,42 @@ const ChallengeDetail: React.FC = () => {
                     </Button>
                   ))}
                 </Box>
-                <Button
-                  variant="contained"
-                  startIcon={<Send />}
-                  onClick={handleSubmit}
-                  disabled={submitMutation.isPending || !code.trim() || !challenge.isUnlocked}
-                >
-                  {submitMutation.isPending ? <CircularProgress size={20} /> : 'Submit'}
-                </Button>
+
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <Button variant="outlined" size="small" onClick={handleClearCode}>
+                    Clear code
+                  </Button>
+                  <Button variant="outlined" size="small" onClick={handleCopyStarterCode}>
+                    Copy starter code
+                  </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={<Send />}
+                    onClick={handleSubmit}
+                    disabled={submitMutation.isPending || !code.trim() || !challenge?.isUnlocked}
+                  >
+                    {submitMutation.isPending ? <CircularProgress size={20} /> : 'Submit'}
+                  </Button>
+                </Box>
               </Box>
+              {(copyMessage || !challenge?.isUnlocked || !code.trim()) && (
+                <Box sx={{ mt: 1 }}>
+                  {!challenge?.isUnlocked ? (
+                    <Alert severity="warning">This challenge is locked. Unlock it before submitting.</Alert>
+                  ) : copyMessage ? (
+                    <Alert severity={copyMessage.includes('Unable') ? 'error' : 'success'}>{copyMessage}</Alert>
+                  ) : (
+                    <Alert severity="info">Enter your solution code before submitting.</Alert>
+                  )}
+                </Box>
+              )}
+              {submissionResult && submissionResult.status && (
+                <Box sx={{ mt: 1 }}>
+                  <Alert severity={submissionResult.status === 'Accepted' ? 'success' : 'info'}>
+                    Last submission: {submissionResult.status}. Score: {submissionResult.score ?? 'N/A'}%.
+                  </Alert>
+                </Box>
+              )}
             </Box>
 
             <Box sx={{ flexGrow: 1 }}>
