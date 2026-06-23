@@ -143,6 +143,16 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ message: 'Code cannot be empty' });
     }
 
+    const codeWithoutComments = code
+      .replace(/\/\/.*$/gm, '')
+      .replace(/#.*$/gm, '')
+      .replace(/\/\*[\s\S]*?\*\//gm, '')
+      .replace(/\s+/g, '');
+
+    if (!codeWithoutComments || ['pass', 'return', 'return;', 'thrownewError', 'thrownewError();'].includes(codeWithoutComments)) {
+      return res.status(400).json({ message: 'Code cannot be blank or just placeholder logic.' });
+    }
+
     if (code.length > 10000) {
       return res.status(400).json({ message: 'Code is too long. Maximum 10KB allowed.' });
     }
