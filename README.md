@@ -1,136 +1,157 @@
-# Algonix
+<div align="center">
 
-A gamified coding skill development platform. Practice algorithms, earn badges, climb leaderboards, and unlock challenges through skill tests or progressive completion.
+# ALGONIX
 
-🔗 **Live Demo:** https://algonix-frontend.onrender.com
+### Gamified Inter-College Competitive Coding Platform
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20App-6C63FF?style=for-the-badge&logo=render&logoColor=white)](https://algonix-frontend.onrender.com)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Docker](https://img.shields.io/badge/Docker-Container%20Exec-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+
+> A full-stack competitive coding platform with XP-based leveling, real-time leaderboards, certificate generation, and secure container-native code execution — built for inter-college communities.
+
+</div>
+
+---
+
+## Screenshots
+
+| Dashboard | Leaderboard |
+|-----------|-------------|
+| ![Dashboard](./assets/dashboard.png) | ![Leaderboard](./assets/leaderboard.png) |
+
+| Profile & Badges | Certificate of Achievement |
+|-----------------|---------------------------|
+| ![Profile](./assets/profile.png) | ![Certificate](./assets/certificate.png) |
+
+---
 
 ## Features
 
-- **Coding Challenges** — Multi-difficulty (Beginner → Expert) with progressive unlocking
-- **Skill Tests** — MCQ-based fast-track unlocking by difficulty level
-- **Code Editor** — Monaco Editor with multi-language support (JS, Python, Java, C++)
-- **LeetCode-Style Submissions** — Write standard class or function-based solutions (`class Solution`, `def two_sum`, etc.). The platform automatically wraps and executes them with input-injecting test runners.
-- **Performance Profiling** — Microsecond-accurate runtimes (ms) and estimated memory footprints (MB) returned for every submission.
-- **Submission Rate-Limiting** — Anti-spam limits restricting submissions to 1 request every 5 seconds to prevent compiler abuse.
-- **Plagiarism Detection** — Structural AST analysis (Python) and keyword-aware regex token-normalization (JS, C++, Java) to catch copies from other users.
-- **Gamification** — Points, levels, badges, streaks, and certificates
-- **Leaderboards** — Weekly and all-time rankings
-- **Admin Panel** — Manage challenges, users, and platform stats
+- **Gamified Progression** — XP points, levels, streaks, and badges for every solved challenge
+- **Leaderboard** — Weekly & All-Time rankings with real-time updates
+- **Certificate Generation** — Auto-generated PDF certificates with digital signature on mastery completion
+- **Container-Native Code Execution** — Isolated Docker containers per submission for secure, sandboxed judging
+- **Anti-Plagiarism** — Structural code similarity detection to flag copied solutions
+- **Placeholder Rejection** — Frontend validates against empty/boilerplate code before submission
+- **User Profiles** — Track level progress, solved problems, badges, and earned certificates
+- **Admin Panel** — Manage challenges, users, and platform settings
+- **Responsive UI** — Works across desktop and mobile
+
+---
 
 ## Tech Stack
 
 | Layer | Technology |
-|---|---|
-| Frontend | React 18, TypeScript, Material-UI, TanStack Query, Monaco Editor |
-| Backend | Node.js, Express.js, MongoDB/Mongoose, JWT |
-| Code Execution | **Container-Native Execution** (Node, Python 3, G++, JDK 17) |
-| DevOps | Docker, Docker Compose, Nginx |
-
-## Code Execution Architecture
-
-Algonix uses **Container-Native Execution** to compile and run student submissions:
-- **No External Dependencies**: External whitelisted compilers (like public Piston) and DNS-blocked services (like Glot API) have been completely removed.
-- **Deployment-Isolated**: The deployment containers (on Render/Railway or local Docker) are pre-installed with `python3`, `g++`, and `openjdk17-jdk`. Submissions are executed natively and securely inside the container.
-- **Local Fallback**: During local development, the backend will automatically compile and run code using your local computer's native runtimes, requiring zero Docker configuration.
+|-------|-----------|
+| Frontend | React 18, React Router, Axios |
+| Backend | Node.js, Express.js |
+| Database | MongoDB (Atlas) |
+| Code Execution | Docker (container-native, isolated) |
+| Auth | JWT (JSON Web Tokens) |
+| Deployment | Render (Frontend + Backend) |
+| Certificate | PDF generation with digital watermark |
 
 ---
 
-## Advanced Interview & Tech Features
-
-To stand out in technical interviews, Algonix implements advanced platform security, analysis, and certification features:
-- **Performance Profiling (Feature A)**: Employs microsecond-accurate child process execution measurement (`process.hrtime.bigint()`) and custom memory baseline heuristics to calculate and return exact execution times (ms) and peak memory footprints (MB) consumed per test case.
-- **Submission Rate-Limiting (Feature B)**: Prevents server resource exhaustion or execution pool spam by throttling submissions to **1 request every 5 seconds** via Express middleware.
-- **Anti-Plagiarism Engine (Feature C)**: Validates code uniqueness by generating structural syntax fingerprints:
-  - **Python AST Analyzer**: Compiles source code to an Abstract Syntax Tree (AST), stripping local identifiers, function names, and constants to map the raw logical structure.
-  - **Token Regex Normalizer**: Strips comments/spaces and maps language-specific tokens (variables, keywords, declarations, types) to a generic trace across JavaScript, C++, and Java.
-  - Automatically queries the MongoDB collection to match structural copies from other users.
-- **Digital Certificates & Verification (Feature D)**: Manages automated and manual certificate issuance:
-  - **Auto-Allocation**: Instantly awards certificates on successful challenge completions: **3 Beginner**, **5 Intermediate**, or **10 Advanced** problems solved.
-  - **Manual Admin Issuance**: Interactive form in the Admin Panel to award custom certificates by student email.
-  - **Printable HTML Engine**: Serves customized, print-friendly certificate pages that trigger browser-native `window.print()` rendering (reducing server CPU/RAM load to 0%).
-  - **Adobe-Style Verification Seal**: Features a professional digital signature block containing dynamic dates, verification checkmark overlays, and location tags (Nashik).
-
----
-
-## Quick Start
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
-- Python 3, G++, and JDK (if testing C++/Java locally without Docker)
+- Node.js v18+
+- MongoDB Atlas URI
+- Docker (for local code execution)
 
-### Local Development
+### Installation
 
-1. **Install all dependencies**
-   ```bash
-   npm run install-all
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/sanket1035/algonix.git
+cd algonix
 
-2. **Configure environment**
-   ```bash
-   cp backend/.env.example backend/.env
-   ```
-   *Edit `backend/.env` with your MongoDB connection details. No `GLOT_TOKEN` or `PISTON_URL` is required.*
+# Install backend dependencies
+cd server
+npm install
 
-3. **Start dev servers** (Frontend on `:3000`, Backend on `:5000`)
-   ```bash
-   npm run dev
-   ```
+# Install frontend dependencies
+cd ../client
+npm install
+```
 
----
+### Environment Variables
 
-## Environment Variables
-
-Create `backend/.env` from `backend/.env.example`:
+Create `.env` in `/server`:
 
 ```env
+MONGO_URI=your_mongodb_atlas_uri
+JWT_SECRET=your_jwt_secret
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/algonix
-JWT_SECRET=<your_strong_secret>
-NODE_ENV=development
-FRONTEND_URL=http://localhost:3000
+```
+
+### Run Locally
+
+```bash
+# Start backend
+cd server && npm run dev
+
+# Start frontend (new terminal)
+cd client && npm start
 ```
 
 ---
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/auth/register` | Register user |
-| POST | `/api/auth/login` | Login |
-| GET | `/api/auth/me` | Get current user |
-| PUT | `/api/auth/profile` | Update profile |
-| GET | `/api/challenges` | List challenges |
-| GET | `/api/challenges/:id` | Get challenge |
-| POST | `/api/challenges/skill-test` | Get skill test questions |
-| POST | `/api/challenges/skill-test/submit` | Submit skill test |
-| POST | `/api/submissions` | Submit solution |
-| GET | `/api/submissions/my-submissions` | User submissions |
-| GET | `/api/leaderboard/weekly` | Weekly leaderboard |
-| GET | `/api/leaderboard/all-time` | All-time leaderboard |
+| Method | Route | Description |
+|--------|-------|-------------|
+| POST | `/api/auth/register` | Register new user |
+| POST | `/api/auth/login` | Login and get JWT |
+| GET | `/api/challenges` | List all challenges |
+| GET | `/api/challenges/:id` | Get challenge details |
+| POST | `/api/submissions` | Submit code for judging |
+| GET | `/api/leaderboard` | Get leaderboard data |
+| GET | `/api/profile` | Get user profile & badges |
+| GET | `/api/certificates/:id` | Download certificate |
+
+---
+
+## Project Structure
+
+```
+algonix/
+├── client/               # React frontend
+│   ├── src/
+│   │   ├── components/   # Reusable UI components
+│   │   ├── pages/        # Dashboard, Challenges, Leaderboard, Profile
+│   │   └── utils/        # API helpers, auth
+├── server/               # Express backend
+│   ├── routes/           # API route handlers
+│   ├── models/           # Mongoose schemas
+│   ├── middleware/        # JWT auth, error handling
+│   └── execution/        # Docker-based code runner
+├── DEPLOYMENT.md         # Render deployment guide
+└── README.md
+```
 
 ---
 
 ## Deployment
 
-### Cloud Platforms
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for full deployment instructions on Render.
 
-**Render / Railway**
-- Simply link your repository to Render or Railway.
-- The included `Dockerfile` and `render.yaml` are pre-configured to build the frontend, package the server, and install Python, C++, and Java runtimes automatically.
+**Live:** [https://algonix-frontend.onrender.com](https://algonix-frontend.onrender.com)
 
 ---
 
-## Security
+## About
 
-- JWT authentication with 7-day expiry
-- bcrypt password hashing
-- **Submission Rate-Limiting** — Throttled to 1 request every 5 seconds per user IP/ID via application-level Express rate limiting
-- **Nginx Rate Limiting** — API limited to 10 req/s, login to 5 req/min
-- CORS restricted to configured origins
-- Security headers via Nginx
+Built as a flagship portfolio project by **Sanket Chaudhari**, B.Tech AI & Data Science student at K.K. Wagh Institute of Engineering Education & Research, Nashik (2026).
+
+---
 
 ## License
 
-MIT
+MIT © [Sanket Chaudhari](https://github.com/sanket1035)
