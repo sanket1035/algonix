@@ -69,7 +69,7 @@ const AppContent: React.FC = () => {
     <Router>
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         {user && <Navbar />}
-        <Box component="main" sx={{ flexGrow: 1, pt: user ? 8 : 0 }}>
+        <Box component="main" sx={{ flexGrow: 1, pt: user ? { xs: 7, sm: 8 } : 0, pb: { xs: 2, sm: 0 } }}>
           <Routes>
             <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
             <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <Register />} />

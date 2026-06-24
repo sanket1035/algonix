@@ -19,8 +19,8 @@ import {
 
 const Contact: React.FC = () => {
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h3" component="h1" gutterBottom sx={{ textAlign: 'center', mb: 4 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
+      <Typography variant="h3" component="h1" gutterBottom sx={{ textAlign: 'center', mb: { xs: 2, sm: 4 }, fontSize: { xs: '1.75rem', sm: '3rem' } }}>
         Contact Us
       </Typography>
 
@@ -79,11 +79,11 @@ const Contact: React.FC = () => {
         </Grid>
       </Grid>
 
-      <Paper sx={{ p: 4, mt: 4, textAlign: 'center' }}>
-        <Typography variant="h5" gutterBottom>
+      <Paper sx={{ p: { xs: 2, sm: 4 }, mt: { xs: 2, sm: 4 }, textAlign: 'center' }}>
+        <Typography variant="h5" gutterBottom sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
           Get in Touch
         </Typography>
-        <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
+        <Typography variant="body1" color="textSecondary" sx={{ mb: 3, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
           Have questions about Algonix? Need help with coding challenges? 
           We're here to support your learning journey!
         </Typography>
@@ -92,7 +92,7 @@ const Contact: React.FC = () => {
             variant="contained"
             startIcon={<Email />}
             href="mailto:studybuddykkw@gmail.com"
-            sx={{ minWidth: 200 }}
+            sx={{ minWidth: { xs: '100%', sm: 200 }, maxWidth: { xs: 300, sm: 'none' } }}
           >
             Send Email
           </Button>
@@ -100,7 +100,7 @@ const Contact: React.FC = () => {
             variant="outlined"
             startIcon={<Phone />}
             href="tel:+919834735054"
-            sx={{ minWidth: 200 }}
+            sx={{ minWidth: { xs: '100%', sm: 200 }, maxWidth: { xs: 300, sm: 'none' } }}
           >
             Call Now
           </Button>

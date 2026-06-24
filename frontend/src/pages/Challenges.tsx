@@ -81,12 +81,12 @@ const Challenges: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
+    <Container maxWidth="xl" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
+      <Box sx={{ mb: { xs: 2, sm: 4 } }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
           Coding Challenges
         </Typography>
-        <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
+        <Typography variant="body1" color="textSecondary" sx={{ mb: 3, fontSize: { xs: '0.875rem', sm: '1rem' } }}>
           Sharpen your skills with our curated collection of programming problems
         </Typography>
 
@@ -99,10 +99,11 @@ const Challenges: React.FC = () => {
             InputProps={{
               startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
             }}
-            sx={{ minWidth: 300 }}
+            sx={{ flex: { xs: '1 1 100%', sm: '1 1 auto' }, minWidth: { xs: 0, sm: 250 }, maxWidth: { xs: '100%', sm: 400 } }}
+            fullWidth={false}
           />
           
-          <FormControl sx={{ minWidth: 150 }}>
+          <FormControl sx={{ flex: { xs: '1 1 calc(50% - 8px)', sm: '0 0 auto' }, minWidth: { xs: 0, sm: 150 } }}>
             <InputLabel>Difficulty</InputLabel>
             <Select
               value={difficultyFilter}
@@ -121,8 +122,9 @@ const Challenges: React.FC = () => {
             variant="outlined"
             startIcon={<FilterList />}
             onClick={() => navigate('/skill-test')}
+            sx={{ flex: { xs: '1 1 calc(50% - 8px)', sm: '0 0 auto' } }}
           >
-            Take Skill Test
+            Skill Test
           </Button>
         </Box>
       </Box>

@@ -346,8 +346,8 @@ const AdminPanel: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
+    <Container maxWidth="xl" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: { xs: 2, sm: 4 }, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
         Admin Panel 🛠️
       </Typography>
 
@@ -400,11 +400,14 @@ const AdminPanel: React.FC = () => {
         </Grid>
       </Grid>
 
-      <Paper sx={{ width: '100%' }}>
+      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <Tabs
           value={activeTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
         >
           <Tab icon={<Code />} label="Challenges" iconPosition="start" />
           <Tab icon={<People />} label="Users" iconPosition="start" />
@@ -414,19 +417,20 @@ const AdminPanel: React.FC = () => {
 
         {/* Challenges Tab */}
         <TabPanel value={activeTab} index={0}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
             <Typography variant="h6">Manage Challenges</Typography>
             <Button
               variant="contained"
               startIcon={<Add />}
               onClick={() => setChallengeDialog(true)}
+              size="small"
             >
               Add Challenge
             </Button>
           </Box>
 
-          <TableContainer>
-            <Table>
+          <TableContainer sx={{ overflowX: 'auto' }}>
+            <Table size="small" sx={{ minWidth: 600 }}>
               <TableHead>
                 <TableRow>
                   <TableCell>Title</TableCell>
@@ -482,8 +486,8 @@ const AdminPanel: React.FC = () => {
           <Typography variant="h6" gutterBottom>
             User Management
           </Typography>
-          <TableContainer>
-            <Table>
+          <TableContainer sx={{ overflowX: 'auto' }}>
+            <Table size="small" sx={{ minWidth: 700 }}>
               <TableHead>
                 <TableRow>
                   <TableCell>Username</TableCell>
@@ -722,8 +726,8 @@ const AdminPanel: React.FC = () => {
               rows={4}
               fullWidth
             />
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <FormControl sx={{ minWidth: 150 }}>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <FormControl sx={{ minWidth: { xs: '100%', sm: 150 }, flex: { xs: '1 1 100%', sm: '0 0 auto' } }}>
                 <InputLabel>Difficulty</InputLabel>
                 <Select
                   value={challengeForm.difficulty}
@@ -741,12 +745,14 @@ const AdminPanel: React.FC = () => {
                 type="number"
                 value={challengeForm.points}
                 onChange={(e) => setChallengeForm({ ...challengeForm, points: parseInt(e.target.value) })}
+                sx={{ flex: { xs: '1 1 calc(50% - 8px)', sm: '0 0 auto' } }}
               />
               <TextField
                 label="Time Limit (s)"
                 type="number"
                 value={challengeForm.timeLimit}
                 onChange={(e) => setChallengeForm({ ...challengeForm, timeLimit: parseInt(e.target.value) })}
+                sx={{ flex: { xs: '1 1 calc(50% - 8px)', sm: '0 0 auto' } }}
               />
             </Box>
             <TextField
@@ -761,7 +767,7 @@ const AdminPanel: React.FC = () => {
             {challengeForm.testCases.map((testCase, index) => (
               <Box key={index} sx={{ border: 1, borderColor: 'grey.300', p: 2, borderRadius: 1 }}>
                 <Typography variant="subtitle2" gutterBottom>Test Case {index + 1}</Typography>
-                <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
+                <Box sx={{ display: 'flex', gap: 2, mb: 1, flexDirection: { xs: 'column', sm: 'row' } }}>
                   <TextField
                     label="Input"
                     value={testCase.input}

@@ -76,43 +76,46 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Grid container spacing={3}>
+    <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         {/* Profile Header */}
         <Grid item xs={12}>
-          <Paper sx={{ p: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          <Paper sx={{ p: { xs: 2, sm: 4 } }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, alignItems: { xs: 'center', md: 'flex-start' }, gap: 3, textAlign: { xs: 'center', md: 'left' } }}>
               <Avatar
                 src={user?.profile?.avatar}
-                sx={{ width: 100, height: 100, fontSize: '2rem' }}
+                sx={{ width: { xs: 80, sm: 100 }, height: { xs: 80, sm: 100 }, fontSize: { xs: '1.5rem', sm: '2rem' } }}
               >
                 {user?.username?.[0]?.toUpperCase()}
               </Avatar>
               <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
                   {user?.profile?.firstName} {user?.profile?.lastName}
                 </Typography>
-                <Typography variant="h6" color="textSecondary">
+                <Typography variant="h6" color="textSecondary" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                   @{user?.username}
                 </Typography>
                 <Typography variant="body1" sx={{ mt: 1 }}>
                   {user?.profile?.bio || 'No bio available'}
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                <Box sx={{ display: 'flex', gap: 1, mt: 2, flexWrap: 'wrap', justifyContent: { xs: 'center', md: 'flex-start' } }}>
                   <Chip
                     icon={<EmojiEvents />}
                     label={`Level ${user?.stats?.level ?? 1}`}
                     color="primary"
+                    size="small"
                   />
                   <Chip
                     icon={<TrendingUp />}
                     label={`${user?.stats?.totalPoints ?? 0} Points`}
                     color="secondary"
+                    size="small"
                   />
                   <Chip
                     icon={<Code />}
                     label={`${user?.stats?.solvedProblems ?? 0} Solved`}
                     variant="outlined"
+                    size="small"
                   />
                 </Box>
               </Box>
@@ -120,6 +123,8 @@ const Profile: React.FC = () => {
                 variant="outlined"
                 startIcon={<Edit />}
                 onClick={() => setEditMode(true)}
+                fullWidth={false}
+                sx={{ width: { xs: '100%', md: 'auto' }, maxWidth: { xs: 300, md: 'none' } }}
               >
                 Edit Profile
               </Button>
@@ -190,7 +195,7 @@ const Profile: React.FC = () => {
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
               {(user?.badges?.length ?? 0) > 0 ? user!.badges.map((badge, index) => (
-                <Card key={index} sx={{ minWidth: 200 }}>
+                <Card key={index} sx={{ minWidth: { xs: '100%', sm: 200 }, flex: { xs: '1 1 100%', sm: '1 1 200px' }, maxWidth: { xs: '100%', sm: 280 } }}>
                   <CardContent sx={{ textAlign: 'center', py: 2 }}>
                     <Typography variant="h4" sx={{ mb: 1 }}>{badge.icon}</Typography>
                     <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{badge.name}</Typography>
@@ -216,7 +221,7 @@ const Profile: React.FC = () => {
               {Array.isArray(certificates) && certificates.length > 0 ? certificates.map((certificate: any) => (
                 <Card key={certificate._id}>
                   <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'stretch', sm: 'center' }, gap: 2 }}>
                       <Box>
                         <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{certificate.name}</Typography>
                         <Typography variant="body2" color="textSecondary">{certificate.level} Level</Typography>
@@ -225,7 +230,8 @@ const Profile: React.FC = () => {
                         </Typography>
                       </Box>
                       <Button variant="outlined" size="small" startIcon={<Download />}
-                        onClick={() => handleDownloadCertificate(certificate._id, certificate.name)}>
+                        onClick={() => handleDownloadCertificate(certificate._id, certificate.name)}
+                        sx={{ alignSelf: { xs: 'stretch', sm: 'center' } }}>
                         Download
                       </Button>
                     </Box>

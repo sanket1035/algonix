@@ -56,11 +56,11 @@ const SkillTestSimple: React.FC = () => {
   const allAnswered = questions.length > 0 && questions.every((_, i) => answers[i] !== undefined);
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>Skill Test 🚀</Typography>
+    <Container maxWidth="md" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
+      <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>Skill Test 🚀</Typography>
 
       {step === 0 && (
-        <Paper sx={{ p: 4 }}>
+        <Paper sx={{ p: { xs: 2, sm: 4 } }}>
           <FormControl fullWidth sx={{ mb: 3 }}>
             <InputLabel>Difficulty</InputLabel>
             <Select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
@@ -82,13 +82,13 @@ const SkillTestSimple: React.FC = () => {
       )}
 
       {step === 1 && (
-        <Paper sx={{ p: 4 }}>
+        <Paper sx={{ p: { xs: 2, sm: 4 } }}>
           <Typography variant="h6" gutterBottom>{difficulty} Test</Typography>
           
           {questions.map((q, i) => (
             <Card key={i} sx={{ mb: 3 }}>
-              <CardContent>
-                <Typography variant="h6">Q{i + 1}: {q.question}</Typography>
+              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: { xs: '0.95rem', sm: '1.25rem' } }}>Q{i + 1}: {q.question}</Typography>
                 <RadioGroup
                   value={answers[i]?.toString() || ''}
                   onChange={(e) => setAnswers({...answers, [i]: parseInt(e.target.value)})}
@@ -101,13 +101,13 @@ const SkillTestSimple: React.FC = () => {
             </Card>
           ))}
 
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button variant="outlined" onClick={() => setStep(0)}>Back</Button>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Button variant="outlined" onClick={() => setStep(0)} sx={{ flex: { xs: '1 1 100%', sm: 'none' } }}>Back</Button>
             <Button 
               variant="contained" 
               onClick={handleSubmit}
               disabled={!allAnswered || submitTest.isPending}
-              sx={{ flexGrow: 1 }}
+              sx={{ flex: { xs: '1 1 100%', sm: 1 } }}
             >
               {submitTest.isPending ? 'Submitting...' : 'Submit Test'}
             </Button>
@@ -116,7 +116,7 @@ const SkillTestSimple: React.FC = () => {
       )}
 
       {step === 2 && result && (
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
+        <Paper sx={{ p: { xs: 2, sm: 4 }, textAlign: 'center' }}>
           {result.passed ? (
             <Box>
               <Typography variant="h5" color="success.main">Passed! 🎉</Typography>

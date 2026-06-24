@@ -52,23 +52,23 @@ const Leaderboard: React.FC = () => {
   const pointsField = activeTab === 0 ? 'weeklyPoints' : 'totalPoints';
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: { xs: 2, sm: 4 }, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
         Leaderboard 🏆
       </Typography>
 
       {/* Current User Stats */}
-      <Card sx={{ mb: 4, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-            <Avatar sx={{ width: 60, height: 60, bgcolor: 'rgba(255,255,255,0.2)' }}>
+      <Card sx={{ mb: { xs: 2, sm: 4 }, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+        <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'center', sm: 'flex-start' }, gap: 2, textAlign: { xs: 'center', sm: 'left' } }}>
+            <Avatar sx={{ width: { xs: 50, sm: 60 }, height: { xs: 50, sm: 60 }, bgcolor: 'rgba(255,255,255,0.2)' }}>
               <Person />
             </Avatar>
             <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h6">
+              <Typography variant="h6" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                 {user?.profile?.firstName} {user?.profile?.lastName} (@{user?.username})
               </Typography>
-              <Box sx={{ display: 'flex', gap: 3, mt: 1 }}>
+              <Box sx={{ display: 'flex', gap: { xs: 2, sm: 3 }, mt: 1, justifyContent: { xs: 'center', sm: 'flex-start' }, flexWrap: 'wrap' }}>
                 <Box>
                   <Typography variant="body2" sx={{ opacity: 0.8 }}>
                     Weekly Rank
@@ -99,11 +99,12 @@ const Leaderboard: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Paper sx={{ width: '100%' }}>
+      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         <Tabs
           value={activeTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
+          variant="fullWidth"
         >
           <Tab
             icon={<TrendingUp />}
@@ -117,8 +118,8 @@ const Leaderboard: React.FC = () => {
           />
         </Tabs>
 
-        <TableContainer>
-          <Table>
+        <TableContainer sx={{ overflowX: 'auto' }}>
+          <Table size="small" sx={{ minWidth: 500 }}>
             <TableHead>
               <TableRow>
                 <TableCell>Rank</TableCell>
@@ -143,18 +144,18 @@ const Leaderboard: React.FC = () => {
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}>
                       <Avatar
                         src={entry.profile?.avatar}
-                        sx={{ width: 40, height: 40 }}
+                        sx={{ width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 } }}
                       >
                         {entry.username?.[0]?.toUpperCase()}
                       </Avatar>
-                      <Box>
-                        <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 'medium', fontSize: { xs: '0.8rem', sm: '1rem' } }} noWrap>
                           {entry.profile?.firstName} {entry.profile?.lastName}
                         </Typography>
-                        <Typography variant="body2" color="textSecondary">
+                        <Typography variant="caption" color="textSecondary" noWrap>
                           @{entry.username}
                         </Typography>
                       </Box>

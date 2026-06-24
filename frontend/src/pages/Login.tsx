@@ -54,14 +54,15 @@ const Login: React.FC = () => {
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       }}
     >
-      <Container maxWidth="sm">
-        <Paper elevation={10} sx={{ p: 4, borderRadius: 3 }}>
+      <Container maxWidth="sm" sx={{ px: { xs: 2, sm: 3 } }}>
+        <Paper elevation={10} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 3 }}>
           <Box sx={{ textAlign: 'center', mb: 3 }}>
             <Typography
               variant="h3"
               component="h1"
               sx={{
                 fontWeight: 'bold',
+                fontSize: { xs: '2rem', sm: '3rem' },
                 background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -70,7 +71,7 @@ const Login: React.FC = () => {
             >
               ALGONIX
             </Typography>
-            <Typography variant="h5" color="textSecondary">
+            <Typography variant="h5" color="textSecondary" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
               Welcome Back!
             </Typography>
             <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>

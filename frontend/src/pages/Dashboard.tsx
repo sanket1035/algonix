@@ -88,12 +88,12 @@ const Dashboard: React.FC = () => {
   const nextLevelProgress = getNextLevelProgress();
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 4 }}>
+    <Container maxWidth="xl" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: { xs: 2, sm: 4 }, fontSize: { xs: '1.25rem', sm: '2.125rem' } }}>
         Welcome back, {user?.profile?.firstName || user?.username}! 👋
       </Typography>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         {/* Stats Cards */}
         <Grid item xs={12} md={3}>
           <Card sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
@@ -302,13 +302,13 @@ const Dashboard: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Weekly Leaderboard Position
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                 <Chip
                   label={`#${leaderboardData.currentUser?.rank || 'N/A'}`}
                   color="primary"
                   sx={{ fontWeight: 'bold' }}
                 />
-                <Typography variant="body2">
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
                   You're ranked #{leaderboardData.currentUser?.rank || 'N/A'} this week with{' '}
                   {user?.stats?.weeklyPoints ?? 0} points
                 </Typography>
