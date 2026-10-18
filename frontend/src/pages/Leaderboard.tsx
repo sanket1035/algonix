@@ -20,6 +20,7 @@ import {
 import { EmojiEvents, TrendingUp, Person } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { leaderboardAPI } from '../services/api';
+import { brand } from '../theme';
 import { useAuth } from '../contexts/AuthContext';
 
 const Leaderboard: React.FC = () => {
@@ -58,7 +59,7 @@ const Leaderboard: React.FC = () => {
       </Typography>
 
       {/* Current User Stats */}
-      <Card sx={{ mb: { xs: 2, sm: 4 }, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+      <Card sx={{ mb: { xs: 2, sm: 4 }, background: brand.gradient, color: 'white', border: 'none' }}>
         <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'center', sm: 'flex-start' }, gap: 2, textAlign: { xs: 'center', sm: 'left' } }}>
             <Avatar sx={{ width: { xs: 50, sm: 60 }, height: { xs: 50, sm: 60 }, bgcolor: 'rgba(255,255,255,0.2)' }}>
@@ -134,8 +135,8 @@ const Leaderboard: React.FC = () => {
                 <TableRow
                   key={entry._id}
                   sx={{
-                    backgroundColor: entry._id === user?.id ? 'rgba(103, 126, 234, 0.1)' : 'inherit',
-                    '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' },
+                    backgroundColor: entry._id === user?.id ? 'rgba(99, 102, 241, 0.12)' : 'inherit',
+                    '&:hover': { backgroundColor: 'action.hover' },
                   }}
                 >
                   <TableCell>

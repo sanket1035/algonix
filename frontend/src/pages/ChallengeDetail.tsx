@@ -23,6 +23,7 @@ import { Send, CheckCircle, Error as ErrorIcon, Description, Code as CodeIcon } 
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Editor from '@monaco-editor/react';
+import { useColorMode } from '../theme';
 import { challengesAPI, submissionsAPI } from '../services/api';
 import { Challenge } from '../types';
 
@@ -45,6 +46,7 @@ const ChallengeDetail: React.FC = () => {
   const queryClient = useQueryClient();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { mode } = useColorMode();
   
   const [activeTab, setActiveTab] = useState(0);
   const [mobileView, setMobileView] = useState<'problem' | 'code'>('problem');
@@ -307,7 +309,8 @@ const ChallengeDetail: React.FC = () => {
                   <Box
                     component="pre"
                     sx={{
-                      backgroundColor: '#f5f5f5',
+                      bgcolor: 'action.hover',
+                      fontFamily: '"JetBrains Mono", monospace',
                       p: 1,
                       borderRadius: 1,
                       fontSize: '0.8rem',
@@ -325,7 +328,8 @@ const ChallengeDetail: React.FC = () => {
                   <Box
                     component="pre"
                     sx={{
-                      backgroundColor: '#f5f5f5',
+                      bgcolor: 'action.hover',
+                      fontFamily: '"JetBrains Mono", monospace',
                       p: 1,
                       borderRadius: 1,
                       fontSize: '0.8rem',
@@ -421,8 +425,9 @@ const ChallengeDetail: React.FC = () => {
           language={getLanguageId(language)}
           value={code}
           onChange={handleCodeChange}
-          theme="vs-dark"
+          theme={mode === 'dark' ? 'vs-dark' : 'light'}
           options={{
+            fontFamily: '"JetBrains Mono", monospace',
             minimap: { enabled: false },
             fontSize: isMobile ? 13 : 14,
             lineNumbers: 'on',

@@ -5,8 +5,6 @@ import {
   Paper,
   Typography,
   Box,
-  Card,
-  CardContent,
   LinearProgress,
   Chip,
   Avatar,
@@ -21,6 +19,8 @@ import {
   PlayArrow,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import StatCard from '../components/StatCard';
+import PageHeader from '../components/PageHeader';
 import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { challengesAPI, leaderboardAPI } from '../services/api';
@@ -88,80 +88,34 @@ const Dashboard: React.FC = () => {
   const nextLevelProgress = getNextLevelProgress();
 
   return (
-    <Container maxWidth="xl" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: { xs: 2, sm: 4 }, fontSize: { xs: '1.25rem', sm: '2.125rem' } }}>
-        Welcome back, {user?.profile?.firstName || user?.username}! 👋
-      </Typography>
+    <Container maxWidth="xl" sx={{ py: { xs: 3, sm: 4 }, px: { xs: 2, sm: 3 } }}>
+      <PageHeader
+        title={<>Welcome back, {user?.profile?.firstName || user?.username} 👋</>}
+        subtitle="Here's how your practice is going."
+        action={<Button variant="contained" startIcon={<PlayArrow />} onClick={() => navigate('/challenges')}>Solve a challenge</Button>}
+      />
 
       <Grid container spacing={{ xs: 2, sm: 3 }}>
         {/* Stats Cards */}
-        <Grid item xs={12} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {user?.stats?.totalPoints ?? 0}
-                  </Typography>
-                  <Typography variant="body2">Total Points</Typography>
-                </Box>
-                <TrendingUp sx={{ fontSize: 40, opacity: 0.8 }} />
-              </Box>
-            </CardContent>
-          </Card>
+        <Grid item xs={6} md={3}>
+          <StatCard label="Total Points" value={user?.stats?.totalPoints ?? 0} icon={<TrendingUp />} tone="primary" />
         </Grid>
 
-        <Grid item xs={12} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', color: 'white' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {user?.stats?.level ?? 1}
-                  </Typography>
-                  <Typography variant="body2">Current Level</Typography>
-                </Box>
-                <EmojiEvents sx={{ fontSize: 40, opacity: 0.8 }} />
-              </Box>
-            </CardContent>
-          </Card>
+        <Grid item xs={6} md={3}>
+          <StatCard label="Current Level" value={user?.stats?.level ?? 1} icon={<EmojiEvents />} tone="secondary" />
         </Grid>
 
-        <Grid item xs={12} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {user?.stats?.solvedProblems ?? 0}
-                  </Typography>
-                  <Typography variant="body2">Problems Solved</Typography>
-                </Box>
-                <Code sx={{ fontSize: 40, opacity: 0.8 }} />
-              </Box>
-            </CardContent>
-          </Card>
+        <Grid item xs={6} md={3}>
+          <StatCard label="Problems Solved" value={user?.stats?.solvedProblems ?? 0} icon={<Code />} tone="success" />
         </Grid>
 
-        <Grid item xs={12} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', color: 'white' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {user?.stats?.streak ?? 0}
-                  </Typography>
-                  <Typography variant="body2">Day Streak</Typography>
-                </Box>
-                <Speed sx={{ fontSize: 40, opacity: 0.8 }} />
-              </Box>
-            </CardContent>
-          </Card>
+        <Grid item xs={6} md={3}>
+          <StatCard label="Day Streak" value={user?.stats?.streak ?? 0} icon={<Speed />} tone="warning" />
         </Grid>
 
         {/* Level Progress */}
         <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3 }}>
+          <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Level Progress
             </Typography>
@@ -185,7 +139,7 @@ const Dashboard: React.FC = () => {
 
         {/* Recent Badges */}
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3 }}>
+          <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Recent Badges
             </Typography>
@@ -211,7 +165,7 @@ const Dashboard: React.FC = () => {
 
         {/* Difficulty Progress */}
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
+          <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Progress by Difficulty
             </Typography>
@@ -237,7 +191,7 @@ const Dashboard: React.FC = () => {
 
         {/* Quick Actions */}
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
+          <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Quick Actions
             </Typography>
@@ -298,7 +252,7 @@ const Dashboard: React.FC = () => {
         {/* Weekly Ranking */}
         {leaderboardData && (
           <Grid item xs={12}>
-            <Paper sx={{ p: 3 }}>
+            <Paper sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" gutterBottom>
                 Weekly Leaderboard Position
               </Typography>

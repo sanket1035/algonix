@@ -150,7 +150,7 @@ const Challenges: React.FC = () => {
                       flexDirection: 'column',
                       position: 'relative',
                       opacity: challenge.isUnlocked ? 1 : 0.6,
-                      border: challenge.isSolved ? '2px solid #4caf50' : 'none',
+                      border: challenge.isSolved ? '1px solid #10B981' : undefined,
                     }}
                   >
                     <CardContent sx={{ flexGrow: 1 }}>
