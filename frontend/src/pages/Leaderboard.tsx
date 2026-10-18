@@ -20,7 +20,7 @@ import {
 import { EmojiEvents, TrendingUp, Person } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import { leaderboardAPI } from '../services/api';
-import { brand } from '../theme';
+import { palette, fonts } from '../theme';
 import { useAuth } from '../contexts/AuthContext';
 
 const Leaderboard: React.FC = () => {
@@ -37,16 +37,13 @@ const Leaderboard: React.FC = () => {
     queryFn: () => leaderboardAPI.getAllTimeLeaderboard(),
   });
 
-  const getRankColor = (rank: number) => {
-    if (rank === 1) return '#FFD700';
-    if (rank === 2) return '#C0C0C0';
-    if (rank === 3) return '#CD7F32';
-    return 'transparent';
-  };
 
   const getRankIcon = (rank: number) => {
-    if (rank <= 3) return <EmojiEvents sx={{ color: getRankColor(rank) }} />;
-    return <span>{rank}</span>;
+    return (
+      <Box component="span" sx={{ fontFamily: fonts.mono, fontWeight: rank <= 3 ? 700 : 400 }}>
+        {String(rank).padStart(2, '0')}
+      </Box>
+    );
   };
 
   const currentData = activeTab === 0 ? weeklyData : allTimeData;
@@ -55,14 +52,14 @@ const Leaderboard: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: { xs: 2, sm: 4 }, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
-        Leaderboard 🏆
+        Leaderboard
       </Typography>
 
       {/* Current User Stats */}
-      <Card sx={{ mb: { xs: 2, sm: 4 }, background: brand.gradient, color: 'white', border: 'none' }}>
+      <Card sx={{ mb: { xs: 2, sm: 4 }, bgcolor: palette.charcoal, color: palette.page, border: 'none' }}>
         <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'center', sm: 'flex-start' }, gap: 2, textAlign: { xs: 'center', sm: 'left' } }}>
-            <Avatar sx={{ width: { xs: 50, sm: 60 }, height: { xs: 50, sm: 60 }, bgcolor: 'rgba(255,255,255,0.2)' }}>
+            <Avatar sx={{ width: { xs: 50, sm: 60 }, height: { xs: 50, sm: 60 }, bgcolor: 'rgba(255,255,255,0.12)' }}>
               <Person />
             </Avatar>
             <Box sx={{ flexGrow: 1 }}>
@@ -135,7 +132,7 @@ const Leaderboard: React.FC = () => {
                 <TableRow
                   key={entry._id}
                   sx={{
-                    backgroundColor: entry._id === user?.id ? 'rgba(99, 102, 241, 0.12)' : 'inherit',
+                    backgroundColor: entry._id === user?.id ? 'palette.sand' : 'inherit',
                     '&:hover': { backgroundColor: 'action.hover' },
                   }}
                 >

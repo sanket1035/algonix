@@ -67,7 +67,7 @@ const Register: React.FC = () => {
   };
 
   return (
-    <AuthLayout title="Create your account" subtitle="Start solving challenges and tracking your progress.">
+    <AuthLayout title="Create your account" subtitle="Start solving problems and tracking your progress.">
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -149,10 +149,13 @@ const Register: React.FC = () => {
                 mt: 3,
                 mb: 2,
                 py: 1.5,
+                fontSize: 13,
+                fontWeight: 700,
+                letterSpacing: '0.08em',
               }}
               disabled={loading}
             >
-              {loading ? <CircularProgress size={22} color="inherit" /> : 'Create Account'}
+              {loading ? <CircularProgress size={22} color="inherit" /> : 'CREATE ACCOUNT'}
             </Button>
 
             <Box sx={{ textAlign: 'center' }}>
@@ -161,9 +164,9 @@ const Register: React.FC = () => {
                 <Link
                   variant="body2"
                   onClick={() => navigate('/login')}
-                  sx={{ textDecoration: 'none', cursor: 'pointer', fontWeight: 600 }}
+                  sx={{ color: 'text.primary', cursor: 'pointer', fontWeight: 600 }}
                 >
-                  Sign in here
+                  Sign in
                 </Link>
               </Typography>
             </Box>

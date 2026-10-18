@@ -50,7 +50,7 @@ const AppContent: React.FC = () => {
 
   return (
     <Router>
-      <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         {user && <Navbar />}
         <Box component="main" sx={{ flexGrow: 1, minWidth: 0, pt: user ? { xs: 7, sm: 8 } : 0, pb: { xs: 2, sm: 4 } }}>
           <Routes>

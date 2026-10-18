@@ -17,10 +17,11 @@ import {
   Speed,
   Star,
   PlayArrow,
+  WorkspacePremiumOutlined,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import StatCard from '../components/StatCard';
 import PageHeader from '../components/PageHeader';
+import { difficultyLabel } from '../theme';
 import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { challengesAPI, leaderboardAPI } from '../services/api';
@@ -58,8 +59,8 @@ const Dashboard: React.FC = () => {
     const userBadges = user?.badges || [];
     if (userBadges.length === 0 && (user?.stats?.solvedProblems || 0) > 0) {
       return [
-        { name: 'Starter', description: 'Solved 1 problem', icon: '🌱', earnedAt: new Date() },
-        { name: 'Beginner Solver', description: 'Solved 5 problems', icon: '📚', earnedAt: new Date() }
+        { name: 'Starter', description: 'Solved 1 problem', icon: '', earnedAt: new Date() },
+        { name: 'Beginner Solver', description: 'Solved 5 problems', icon: '', earnedAt: new Date() }
       ];
     }
     return userBadges.slice(-3);
@@ -88,30 +89,28 @@ const Dashboard: React.FC = () => {
   const nextLevelProgress = getNextLevelProgress();
 
   return (
-    <Container maxWidth="xl" sx={{ py: { xs: 3, sm: 4 }, px: { xs: 2, sm: 3 } }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 4 }, px: { xs: 2, sm: 4 } }}>
       <PageHeader
-        title={<>Welcome back, {user?.profile?.firstName || user?.username} 👋</>}
+        title={<>Welcome back, {user?.profile?.firstName || user?.username}</>}
         subtitle="Here's how your practice is going."
-        action={<Button variant="contained" startIcon={<PlayArrow />} onClick={() => navigate('/challenges')}>Solve a challenge</Button>}
+        action={<Button variant="contained" onClick={() => navigate('/challenges')} sx={{ px: 3, fontSize: 13, fontWeight: 700, letterSpacing: '0.06em' }}>SOLVE A PROBLEM</Button>}
       />
 
       <Grid container spacing={{ xs: 2, sm: 3 }}>
-        {/* Stats Cards */}
-        <Grid item xs={6} md={3}>
-          <StatCard label="Total Points" value={user?.stats?.totalPoints ?? 0} icon={<TrendingUp />} tone="primary" />
-        </Grid>
-
-        <Grid item xs={6} md={3}>
-          <StatCard label="Current Level" value={user?.stats?.level ?? 1} icon={<EmojiEvents />} tone="secondary" />
-        </Grid>
-
-        <Grid item xs={6} md={3}>
-          <StatCard label="Problems Solved" value={user?.stats?.solvedProblems ?? 0} icon={<Code />} tone="success" />
-        </Grid>
-
-        <Grid item xs={6} md={3}>
-          <StatCard label="Day Streak" value={user?.stats?.streak ?? 0} icon={<Speed />} tone="warning" />
-        </Grid>
+        {/* Stats */}
+        {[
+          { label: 'Total points', value: user?.stats?.totalPoints ?? 0 },
+          { label: 'Current level', value: user?.stats?.level ?? 1 },
+          { label: 'Problems solved', value: user?.stats?.solvedProblems ?? 0 },
+          { label: 'Day streak', value: user?.stats?.streak ?? 0 },
+        ].map((stat) => (
+          <Grid item xs={6} md={3} key={stat.label}>
+            <Paper sx={{ p: 2.5, height: '100%' }}>
+              <Typography variant="body2" color="text.secondary">{stat.label}</Typography>
+              <Typography sx={{ fontSize: { xs: 30, sm: 38 }, fontWeight: 500, letterSpacing: '-0.03em', mt: 0.5 }}>{stat.value}</Typography>
+            </Paper>
+          </Grid>
+        ))}
 
         {/* Level Progress */}
         <Grid item xs={12} md={8}>
@@ -148,7 +147,7 @@ const Dashboard: React.FC = () => {
                 recentBadges.map((badge, index) => (
                   <Chip
                     key={index}
-                    icon={<span>{badge.icon}</span>}
+                    icon={<WorkspacePremiumOutlined />}
                     label={badge.name}
                     variant="outlined"
                     size="small"
@@ -173,7 +172,7 @@ const Dashboard: React.FC = () => {
               {Object.entries(difficultyStats).map(([difficulty, stats]) => (
                 <Box key={difficulty}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">{difficulty}</Typography>
+                    <Typography variant="body2">{difficultyLabel[difficulty] ?? difficulty}</Typography>
                     <Typography variant="body2">
                       {stats.solved}/{stats.total}
                     </Typography>
@@ -243,7 +242,7 @@ const Dashboard: React.FC = () => {
                 }}
                 sx={{ justifyContent: 'flex-start' }}
               >
-                🏆 Fix My Badges
+                Recalculate my badges
               </Button>
             </Box>
           </Paper>

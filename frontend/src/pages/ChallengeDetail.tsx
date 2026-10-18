@@ -19,11 +19,12 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import { Send, CheckCircle, Error as ErrorIcon, Description, Code as CodeIcon } from '@mui/icons-material';
+import { CheckCircle, Error as ErrorIcon, Description, Code as CodeIcon } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Editor from '@monaco-editor/react';
-import { useColorMode } from '../theme';
+import type { Monaco } from '@monaco-editor/react';
+import { palette, fonts, difficultyLabel, difficultyColor } from '../theme';
 import { challengesAPI, submissionsAPI } from '../services/api';
 import { Challenge } from '../types';
 
@@ -41,12 +42,13 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
 
 type Language = 'javascript' | 'python' | 'java' | 'cpp';
 
+const LANGUAGE_LABELS: Record<Language, string> = { javascript: 'JavaScript', python: 'Python', java: 'Java', cpp: 'C++' };
+
 const ChallengeDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { mode } = useColorMode();
   
   const [activeTab, setActiveTab] = useState(0);
   const [mobileView, setMobileView] = useState<'problem' | 'code'>('problem');
@@ -195,14 +197,19 @@ const ChallengeDetail: React.FC = () => {
     });
   };
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Beginner': return 'success';
-      case 'Intermediate': return 'warning';
-      case 'Advanced': return 'error';
-      case 'Expert': return 'secondary';
-      default: return 'default';
-    }
+  const defineEditorTheme = (monaco: Monaco) => {
+    monaco.editor.defineTheme('algonix-warm', {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [],
+      colors: {
+        'editor.background': palette.editor,
+        'editorLineNumber.foreground': '#7A6F68',
+        'editorLineNumber.activeForeground': '#E8DFD8',
+        'editor.lineHighlightBackground': '#2C2927',
+        'editorGutter.background': palette.editor,
+      },
+    });
   };
 
   const getLanguageId = (lang: string) => {
@@ -247,17 +254,21 @@ const ChallengeDetail: React.FC = () => {
     );
   }
 
-  const panelHeight = isMobile ? 'auto' : 'calc(100vh - 150px)';
+  const panelHeight = isMobile ? 'auto' : 'calc(100vh - 88px)';
   const editorMinHeight = isMobile ? 350 : undefined;
 
   const problemPanel = (
-    <Paper sx={{ height: panelHeight, minHeight: isMobile ? 300 : undefined, overflow: 'auto' }}>
-      <Box sx={{ p: { xs: 2, sm: 3 } }}>
+    <Paper sx={{ height: panelHeight, minHeight: isMobile ? 300 : undefined, overflow: 'auto', border: 0 }}>
+      <Box sx={{ p: { xs: 2.5, sm: 3.5 } }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-          <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ fontWeight: 'bold', flexGrow: 1 }}>
+          <Typography variant={isMobile ? 'h5' : 'h4'} component="h1" sx={{ flexGrow: 1 }}>
             {challenge.title}
           </Typography>
-          {challenge.isSolved && <CheckCircle color="success" />}
+          {challenge.isSolved && (
+            <Typography variant="body2" sx={{ color: palette.easy, fontWeight: 600, pt: 1 }}>
+              Solved
+            </Typography>
+          )}
         </Box>
 
         {!challenge.isUnlocked && (
@@ -266,15 +277,13 @@ const ChallengeDetail: React.FC = () => {
           </Alert>
         )}
 
-        <Box sx={{ display: 'flex', gap: 1, mb: 3, flexWrap: 'wrap' }}>
-          <Chip
-            label={challenge.difficulty}
-            color={getDifficultyColor(challenge.difficulty) as any}
-            size={isMobile ? 'small' : 'medium'}
-          />
-          <Chip label={`${challenge.points} points`} variant="outlined" size={isMobile ? 'small' : 'medium'} />
-          <Chip label={`${challenge.timeLimit}s`} variant="outlined" size={isMobile ? 'small' : 'medium'} />
-          <Chip label={`${challenge.memoryLimit}MB`} variant="outlined" size={isMobile ? 'small' : 'medium'} />
+        <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap', fontSize: 14 }}>
+          <Box component="span" sx={{ fontWeight: 600, color: difficultyColor(challenge.difficulty) }}>
+            {difficultyLabel[challenge.difficulty] ?? challenge.difficulty}
+          </Box>
+          {challenge.category && <Box component="span" sx={{ color: 'text.secondary' }}>{challenge.category}</Box>}
+          <Box component="span" sx={{ fontFamily: fonts.mono, fontSize: 13 }}>{challenge.points} pts</Box>
+          <Box component="span" sx={{ color: 'text.secondary' }}>{challenge.timeLimit}s · {challenge.memoryLimit} MB</Box>
         </Box>
 
         <Tabs
@@ -297,7 +306,7 @@ const ChallengeDetail: React.FC = () => {
 
         <TabPanel value={activeTab} index={1}>
           {(Array.isArray(challenge.examples) ? challenge.examples : []).map((example, index) => (
-            <Card key={index} sx={{ mb: 2 }}>
+            <Card key={index} sx={{ mb: 2, bgcolor: '#FFFFFF' }}>
               <CardContent sx={{ p: { xs: 2, sm: 3 }, '&:last-child': { pb: { xs: 2, sm: 3 } } }}>
                 <Typography variant="h6" gutterBottom>
                   Example {index + 1}
@@ -309,10 +318,10 @@ const ChallengeDetail: React.FC = () => {
                   <Box
                     component="pre"
                     sx={{
-                      bgcolor: 'action.hover',
-                      fontFamily: '"JetBrains Mono", monospace',
-                      p: 1,
-                      borderRadius: 1,
+                      bgcolor: palette.page,
+                      fontFamily: fonts.mono,
+                      p: 1.5,
+                      borderRadius: 2,
                       fontSize: '0.8rem',
                       overflow: 'auto',
                       maxWidth: '100%',
@@ -328,10 +337,10 @@ const ChallengeDetail: React.FC = () => {
                   <Box
                     component="pre"
                     sx={{
-                      bgcolor: 'action.hover',
-                      fontFamily: '"JetBrains Mono", monospace',
-                      p: 1,
-                      borderRadius: 1,
+                      bgcolor: palette.page,
+                      fontFamily: fonts.mono,
+                      p: 1.5,
+                      borderRadius: 2,
                       fontSize: '0.8rem',
                       overflow: 'auto',
                       maxWidth: '100%',
@@ -363,38 +372,54 @@ const ChallengeDetail: React.FC = () => {
   );
 
   const codePanel = (
-    <Paper sx={{ height: panelHeight, minHeight: editorMinHeight, display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ p: { xs: 1.5, sm: 2 }, borderBottom: 1, borderColor: 'divider' }}>
+    <Paper sx={{ height: panelHeight, minHeight: editorMinHeight, display: 'flex', flexDirection: 'column', overflow: 'hidden', border: 0, bgcolor: palette.editor }}>
+      <Box sx={{ p: { xs: 1.5, sm: 1.5 }, borderBottom: '1px solid #36322F' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
           <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
             {(['javascript', 'python', 'java', 'cpp'] as Language[]).map((lang) => (
               <Button
                 key={lang}
-                variant={language === lang ? 'contained' : 'outlined'}
                 size="small"
                 onClick={() => setLanguage(lang)}
-                sx={{ fontSize: { xs: '0.7rem', sm: '0.8125rem' }, px: { xs: 1, sm: 1.5 } }}
+                sx={{
+                  minHeight: 32,
+                  px: 1.5,
+                  fontSize: 13,
+                  fontWeight: language === lang ? 600 : 500,
+                  bgcolor: language === lang ? palette.sand : 'transparent',
+                  color: language === lang ? palette.ink : '#B5A89F',
+                  '&:hover': { bgcolor: language === lang ? palette.sand : 'rgba(255,255,255,0.06)' },
+                }}
               >
-                {isMobile ? lang.slice(0, 2).toUpperCase() : lang.toUpperCase()}
+                {LANGUAGE_LABELS[lang]}
               </Button>
             ))}
           </Box>
 
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center', width: { xs: '100%', sm: 'auto' } }}>
-            <Button variant="outlined" size="small" onClick={handleClearCode} sx={{ flex: { xs: 1, sm: 'none' } }}>
+            <Button size="small" onClick={handleClearCode} sx={{ flex: { xs: 1, sm: 'none' }, color: '#D9CEC6', minHeight: 34 }}>
               Clear
             </Button>
-            <Button variant="outlined" size="small" onClick={handleCopyStarterCode} sx={{ flex: { xs: 1, sm: 'none' } }}>
+            <Button size="small" onClick={handleCopyStarterCode} sx={{ flex: { xs: 1, sm: 'none' }, color: '#D9CEC6', minHeight: 34 }}>
               {isMobile ? 'Copy' : 'Copy starter code'}
             </Button>
             <Button
               variant="contained"
-              startIcon={<Send />}
               onClick={handleSubmit}
               disabled={submitMutation.isPending || !code.trim() || !challenge?.isUnlocked}
-              sx={{ flex: { xs: 1, sm: 'none' } }}
+              sx={{
+                flex: { xs: 1, sm: 'none' },
+                minHeight: 34,
+                bgcolor: palette.sand,
+                color: palette.ink,
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                '&:hover': { bgcolor: '#EDE4DE' },
+                '&.Mui-disabled': { bgcolor: '#3A3633', color: '#8A7D75' },
+              }}
             >
-              {submitMutation.isPending ? <CircularProgress size={20} /> : 'Submit'}
+              {submitMutation.isPending ? <CircularProgress size={18} color="inherit" /> : 'SUBMIT'}
             </Button>
           </Box>
         </Box>
@@ -425,9 +450,11 @@ const ChallengeDetail: React.FC = () => {
           language={getLanguageId(language)}
           value={code}
           onChange={handleCodeChange}
-          theme={mode === 'dark' ? 'vs-dark' : 'light'}
+          beforeMount={defineEditorTheme}
+          theme="algonix-warm"
           options={{
-            fontFamily: '"JetBrains Mono", monospace',
+            fontFamily: fonts.mono,
+            padding: { top: 16 },
             minimap: { enabled: false },
             fontSize: isMobile ? 13 : 14,
             lineNumbers: 'on',
@@ -439,13 +466,13 @@ const ChallengeDetail: React.FC = () => {
       </Box>
 
       {submissionError && (
-        <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+        <Box sx={{ p: 2, bgcolor: palette.card }}>
           <Alert severity="error">{submissionError}</Alert>
         </Box>
       )}
 
       {submissionResult && (
-        <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+        <Box sx={{ p: 2, bgcolor: palette.card }}>
           <Alert
             severity={submissionResult.judgeServiceUnavailable ? 'warning' : submissionResult.status === 'Accepted' ? 'success' : 'error'}
             icon={submissionResult.judgeServiceUnavailable ? <ErrorIcon /> : submissionResult.status === 'Accepted' ? <CheckCircle /> : <ErrorIcon />}
@@ -486,7 +513,7 @@ const ChallengeDetail: React.FC = () => {
   );
 
   return (
-    <Container maxWidth="xl" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
+    <Box sx={{ p: { xs: 1, md: 1 }, bgcolor: palette.sand, minHeight: 'calc(100vh - 64px)' }}>
       {isMobile && (
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
           <ToggleButtonGroup
@@ -509,7 +536,7 @@ const ChallengeDetail: React.FC = () => {
         </Box>
       )}
 
-      <Grid container spacing={{ xs: 2, md: 3 }}>
+      <Grid container spacing={1}>
         {isMobile ? (
           <Grid item xs={12}>
             {mobileView === 'problem' ? problemPanel : codePanel}
@@ -525,7 +552,7 @@ const ChallengeDetail: React.FC = () => {
           </>
         )}
       </Grid>
-    </Container>
+    </Box>
   );
 };
 
