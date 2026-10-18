@@ -57,7 +57,7 @@ const SkillTestSimple: React.FC = () => {
 
   return (
     <Container maxWidth="md" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
-      <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>Skill Test 🚀</Typography>
+      <Typography variant="h4" gutterBottom sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>Skill test</Typography>
 
       {step === 0 && (
         <Paper sx={{ p: { xs: 2, sm: 4 } }}>
@@ -119,7 +119,7 @@ const SkillTestSimple: React.FC = () => {
         <Paper sx={{ p: { xs: 2, sm: 4 }, textAlign: 'center' }}>
           {result.passed ? (
             <Box>
-              <Typography variant="h5" color="success.main">Passed! 🎉</Typography>
+              <Typography variant="h5" color="success.main">Passed</Typography>
               <Typography>Score: {result.score}/{result.total}</Typography>
               <Alert severity="success" sx={{ mt: 2 }}>
                 Unlocked {result.unlockedCount} challenges!

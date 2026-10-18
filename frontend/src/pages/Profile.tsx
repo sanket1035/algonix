@@ -25,6 +25,7 @@ import {
   Code,
   Download,
   Star,
+  WorkspacePremiumOutlined,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -197,7 +198,7 @@ const Profile: React.FC = () => {
               {(user?.badges?.length ?? 0) > 0 ? user!.badges.map((badge, index) => (
                 <Card key={index} sx={{ minWidth: { xs: '100%', sm: 200 }, flex: { xs: '1 1 100%', sm: '1 1 200px' }, maxWidth: { xs: '100%', sm: 280 } }}>
                   <CardContent sx={{ textAlign: 'center', py: 2 }}>
-                    <Typography variant="h4" sx={{ mb: 1 }}>{badge.icon}</Typography>
+                    <WorkspacePremiumOutlined sx={{ fontSize: 32, mb: 1, color: 'text.secondary' }} />
                     <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{badge.name}</Typography>
                     <Typography variant="body2" color="textSecondary">{badge.description}</Typography>
                   </CardContent>

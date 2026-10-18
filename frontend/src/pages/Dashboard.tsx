@@ -5,8 +5,6 @@ import {
   Paper,
   Typography,
   Box,
-  Card,
-  CardContent,
   LinearProgress,
   Chip,
   Avatar,
@@ -19,8 +17,11 @@ import {
   Speed,
   Star,
   PlayArrow,
+  WorkspacePremiumOutlined,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import PageHeader from '../components/PageHeader';
+import { difficultyLabel } from '../theme';
 import { useAuth } from '../contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { challengesAPI, leaderboardAPI } from '../services/api';
@@ -58,8 +59,8 @@ const Dashboard: React.FC = () => {
     const userBadges = user?.badges || [];
     if (userBadges.length === 0 && (user?.stats?.solvedProblems || 0) > 0) {
       return [
-        { name: 'Starter', description: 'Solved 1 problem', icon: '🌱', earnedAt: new Date() },
-        { name: 'Beginner Solver', description: 'Solved 5 problems', icon: '📚', earnedAt: new Date() }
+        { name: 'Starter', description: 'Solved 1 problem', icon: '', earnedAt: new Date() },
+        { name: 'Beginner Solver', description: 'Solved 5 problems', icon: '', earnedAt: new Date() }
       ];
     }
     return userBadges.slice(-3);
@@ -88,80 +89,32 @@ const Dashboard: React.FC = () => {
   const nextLevelProgress = getNextLevelProgress();
 
   return (
-    <Container maxWidth="xl" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: { xs: 2, sm: 4 }, fontSize: { xs: '1.25rem', sm: '2.125rem' } }}>
-        Welcome back, {user?.profile?.firstName || user?.username}! 👋
-      </Typography>
+    <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 4 }, px: { xs: 2, sm: 4 } }}>
+      <PageHeader
+        title={<>Welcome back, {user?.profile?.firstName || user?.username}</>}
+        subtitle="Here's how your practice is going."
+        action={<Button variant="contained" onClick={() => navigate('/challenges')} sx={{ px: 3, fontSize: 13, fontWeight: 700, letterSpacing: '0.06em' }}>SOLVE A PROBLEM</Button>}
+      />
 
       <Grid container spacing={{ xs: 2, sm: 3 }}>
-        {/* Stats Cards */}
-        <Grid item xs={12} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {user?.stats?.totalPoints ?? 0}
-                  </Typography>
-                  <Typography variant="body2">Total Points</Typography>
-                </Box>
-                <TrendingUp sx={{ fontSize: 40, opacity: 0.8 }} />
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', color: 'white' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {user?.stats?.level ?? 1}
-                  </Typography>
-                  <Typography variant="body2">Current Level</Typography>
-                </Box>
-                <EmojiEvents sx={{ fontSize: 40, opacity: 0.8 }} />
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {user?.stats?.solvedProblems ?? 0}
-                  </Typography>
-                  <Typography variant="body2">Problems Solved</Typography>
-                </Box>
-                <Code sx={{ fontSize: 40, opacity: 0.8 }} />
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', color: 'white' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    {user?.stats?.streak ?? 0}
-                  </Typography>
-                  <Typography variant="body2">Day Streak</Typography>
-                </Box>
-                <Speed sx={{ fontSize: 40, opacity: 0.8 }} />
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+        {/* Stats */}
+        {[
+          { label: 'Total points', value: user?.stats?.totalPoints ?? 0 },
+          { label: 'Current level', value: user?.stats?.level ?? 1 },
+          { label: 'Problems solved', value: user?.stats?.solvedProblems ?? 0 },
+          { label: 'Day streak', value: user?.stats?.streak ?? 0 },
+        ].map((stat) => (
+          <Grid item xs={6} md={3} key={stat.label}>
+            <Paper sx={{ p: 2.5, height: '100%' }}>
+              <Typography variant="body2" color="text.secondary">{stat.label}</Typography>
+              <Typography sx={{ fontSize: { xs: 30, sm: 38 }, fontWeight: 500, letterSpacing: '-0.03em', mt: 0.5 }}>{stat.value}</Typography>
+            </Paper>
+          </Grid>
+        ))}
 
         {/* Level Progress */}
         <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3 }}>
+          <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Level Progress
             </Typography>
@@ -185,7 +138,7 @@ const Dashboard: React.FC = () => {
 
         {/* Recent Badges */}
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3 }}>
+          <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Recent Badges
             </Typography>
@@ -194,7 +147,7 @@ const Dashboard: React.FC = () => {
                 recentBadges.map((badge, index) => (
                   <Chip
                     key={index}
-                    icon={<span>{badge.icon}</span>}
+                    icon={<WorkspacePremiumOutlined />}
                     label={badge.name}
                     variant="outlined"
                     size="small"
@@ -211,7 +164,7 @@ const Dashboard: React.FC = () => {
 
         {/* Difficulty Progress */}
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
+          <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Progress by Difficulty
             </Typography>
@@ -219,7 +172,7 @@ const Dashboard: React.FC = () => {
               {Object.entries(difficultyStats).map(([difficulty, stats]) => (
                 <Box key={difficulty}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">{difficulty}</Typography>
+                    <Typography variant="body2">{difficultyLabel[difficulty] ?? difficulty}</Typography>
                     <Typography variant="body2">
                       {stats.solved}/{stats.total}
                     </Typography>
@@ -237,7 +190,7 @@ const Dashboard: React.FC = () => {
 
         {/* Quick Actions */}
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3 }}>
+          <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Quick Actions
             </Typography>
@@ -289,7 +242,7 @@ const Dashboard: React.FC = () => {
                 }}
                 sx={{ justifyContent: 'flex-start' }}
               >
-                🏆 Fix My Badges
+                Recalculate my badges
               </Button>
             </Box>
           </Paper>
@@ -298,7 +251,7 @@ const Dashboard: React.FC = () => {
         {/* Weekly Ranking */}
         {leaderboardData && (
           <Grid item xs={12}>
-            <Paper sx={{ p: 3 }}>
+            <Paper sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" gutterBottom>
                 Weekly Leaderboard Position
               </Typography>

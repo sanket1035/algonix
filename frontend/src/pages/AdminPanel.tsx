@@ -348,7 +348,7 @@ const AdminPanel: React.FC = () => {
   return (
     <Container maxWidth="xl" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 1, sm: 3 } }}>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: { xs: 2, sm: 4 }, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
-        Admin Panel 🛠️
+        Admin panel
       </Typography>
 
       {/* Stats Overview */}
@@ -641,9 +641,9 @@ const AdminPanel: React.FC = () => {
                         value={certType}
                         onChange={(e) => setCertType(e.target.value as string)}
                       >
-                        <MenuItem value="Beginner Mastery">🥉 Beginner Mastery</MenuItem>
-                        <MenuItem value="Intermediate Mastery">🥈 Intermediate Mastery</MenuItem>
-                        <MenuItem value="Advanced Mastery">🥇 Advanced Mastery</MenuItem>
+                        <MenuItem value="Beginner Mastery">Beginner Mastery</MenuItem>
+                        <MenuItem value="Intermediate Mastery">Intermediate Mastery</MenuItem>
+                        <MenuItem value="Advanced Mastery">Advanced Mastery</MenuItem>
                       </Select>
                     </FormControl>
                     <Button 
@@ -672,7 +672,7 @@ const AdminPanel: React.FC = () => {
                 <Grid item xs={12} md={4}>
                   <Box sx={{ p: 2, border: 1, borderColor: 'success.main', borderRadius: 1 }}>
                     <Typography variant="subtitle1" color="success.main" gutterBottom>
-                      🥉 Beginner Mastery
+                      Beginner Mastery
                     </Typography>
                     <Typography variant="body2">
                       Auto-awarded after solving 3 Beginner level problems
@@ -682,7 +682,7 @@ const AdminPanel: React.FC = () => {
                 <Grid item xs={12} md={4}>
                   <Box sx={{ p: 2, border: 1, borderColor: 'warning.main', borderRadius: 1 }}>
                     <Typography variant="subtitle1" color="warning.main" gutterBottom>
-                      🥈 Intermediate Mastery
+                      Intermediate Mastery
                     </Typography>
                     <Typography variant="body2">
                       Auto-awarded after solving 5 Intermediate level problems
@@ -692,7 +692,7 @@ const AdminPanel: React.FC = () => {
                 <Grid item xs={12} md={4}>
                   <Box sx={{ p: 2, border: 1, borderColor: 'error.main', borderRadius: 1 }}>
                     <Typography variant="subtitle1" color="error.main" gutterBottom>
-                      🥇 Advanced Mastery
+                      Advanced Mastery
                     </Typography>
                     <Typography variant="body2">
                       Auto-awarded after solving 10 Advanced level problems

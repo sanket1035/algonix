@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Container,
-  Paper,
   TextField,
   Button,
   Typography,
@@ -13,6 +11,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import AuthLayout from '../components/AuthLayout';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -68,40 +67,7 @@ const Register: React.FC = () => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        py: 4,
-      }}
-    >
-      <Container maxWidth="md" sx={{ px: { xs: 2, sm: 3 } }}>
-        <Paper elevation={10} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 3 }}>
-          <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <Typography
-              variant="h3"
-              component="h1"
-              sx={{
-                fontWeight: 'bold',
-                fontSize: { xs: '2rem', sm: '3rem' },
-                background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                mb: 1,
-              }}
-            >
-              ALGONIX
-            </Typography>
-            <Typography variant="h5" color="textSecondary" sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
-              Join the Community!
-            </Typography>
-            <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-              Create your account and start your coding adventure
-            </Typography>
-          </Box>
-
+    <AuthLayout title="Create your account" subtitle="Start solving problems and tracking your progress.">
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -183,14 +149,13 @@ const Register: React.FC = () => {
                 mt: 3,
                 mb: 2,
                 py: 1.5,
-                background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
-                '&:hover': {
-                  background: 'linear-gradient(45deg, #5a6fd8 30%, #6a4190 90%)',
-                },
+                fontSize: 13,
+                fontWeight: 700,
+                letterSpacing: '0.08em',
               }}
               disabled={loading}
             >
-              {loading ? <CircularProgress size={24} /> : 'Create Account'}
+              {loading ? <CircularProgress size={22} color="inherit" /> : 'CREATE ACCOUNT'}
             </Button>
 
             <Box sx={{ textAlign: 'center' }}>
@@ -199,16 +164,14 @@ const Register: React.FC = () => {
                 <Link
                   variant="body2"
                   onClick={() => navigate('/login')}
-                  sx={{ textDecoration: 'none', cursor: 'pointer' }}
+                  sx={{ color: 'text.primary', cursor: 'pointer', fontWeight: 600 }}
                 >
-                  Sign in here
+                  Sign in
                 </Link>
               </Typography>
             </Box>
           </Box>
-        </Paper>
-      </Container>
-    </Box>
+    </AuthLayout>
   );
 };
 
