@@ -1,16 +1,21 @@
 # Algonix Deployment Guide
 
-## Deploy on Render (Live)
+## Deploy on Render
 
-The app is currently deployed on Render using the included `render.yaml`.
+One Render web service runs everything: the Docker build compiles the React app and Express serves it
+together with the `/api` routes, so no separate frontend service or API URL is needed.
 
-1. Fork the repo
-2. Connect to [Render](https://render.com)
-3. Select "New Blueprint" and point to the repo
-4. Set environment variables (see below)
-5. Deploy
+1. Create a free MongoDB Atlas cluster and copy its connection string.
+2. In [Render](https://render.com) choose **New > Blueprint** and select this repo (`render.yaml`).
+3. Set `MONGODB_URI` when prompted. `JWT_SECRET` is generated for you.
+4. Deploy. The app is served at `https://<service-name>.onrender.com`.
 
-**Live:** https://algonix-frontend.onrender.com
+Optional: set `PISTON_URL` to run submissions on a self-hosted Piston instance; without it the
+container's built-in runners (Python, Java, C++, Node) are used. Set `FRONTEND_URL` only if the
+frontend is hosted on a different origin, and then also set `REACT_APP_API_URL` at build time.
+
+Free Render services sleep after inactivity, and free Atlas clusters pause after a period without
+traffic. Resume the cluster in Atlas if the API starts failing after a long gap.
 
 ---
 

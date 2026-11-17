@@ -1,9 +1,12 @@
+# Single Render web service: the Dockerfile builds the React app and Express serves it
+# together with the /api routes, so the frontend calls the API on the same origin.
 services:
   - type: web
     name: algonix
     env: docker
     plan: free
     dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
@@ -13,9 +16,3 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
-        sync: false
-      - key: PISTON_URL
-        sync: false
-      # Use self-hosted Piston CE for isolated code execution.
-      - key: FRONTEND_URL
-        sync: false
